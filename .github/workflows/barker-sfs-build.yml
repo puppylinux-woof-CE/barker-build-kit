@@ -21,20 +21,20 @@ jobs:
           apt-get update
           apt-get install -y \
             busybox \
-            squashfs-tools wget xz-utils ca-certificates gcc g++ binutils \
-            wget kmod python3 curl
+            squashfs-tools wget xz-utils ca-certificates binutils \
+            wget kmod curl
 
       - name: Building main sfs file 
         run: |
         
-              source DISTRO_SPECS
+              . ./DISTRO_SPECS
               
               # Export every variable in the file to GitHub Actions env
               while IFS='=' read -r key value; do
                if [[ ! -z "$key" ]]; then
                  echo "$key=$value" >> $GITHUB_ENV
                fi
-              done < config.env
+              done < ./DISTRO_SPECS
               
               chmod +x 01-build-debian-puppy.sh
               01-build-debian-puppy.sh
