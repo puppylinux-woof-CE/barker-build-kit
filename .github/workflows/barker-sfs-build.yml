@@ -39,6 +39,7 @@ jobs:
               
               chmod +x ./01-build-debian-puppy.sh
               ./01-build-debian-puppy.sh
+              clear
               chmod +x ./03-pack-sfs.sh
               ./03-pack-sfs.sh
               
@@ -46,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DISTRO_NAME }} ${{ env.DISTRO_VERSION }} main SFS file
-          path: puppy-livecd-build/puppy_${{ env.DISTRO_NAME }}_${{ env.KMOD_VERSION }}.sfs         
+          path: puppy-livecd-build/puppy_${{ env.DISTRO_NAME }}_${{ env.DISTRO_VERSION }}.sfs         
