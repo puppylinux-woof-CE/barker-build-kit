@@ -1,4 +1,4 @@
-name: Build Puppy Main SFS
+name: Build Puppy Main SFS + initrd
 
 on:
   #schedule:
@@ -24,7 +24,7 @@ jobs:
             squashfs-tools wget xz-utils ca-certificates \
             wget kmod curl
 
-      - name: Building main sfs file
+      - name: Building main sfs file and initrd
         shell: bash
         run: |
         
