@@ -489,3 +489,4 @@ unmount_system
 
 echo
 echo "===> Done. Debian ${DEBIAN_VERSION_NAME} puppy rootfs is ready!"
+exit 0
