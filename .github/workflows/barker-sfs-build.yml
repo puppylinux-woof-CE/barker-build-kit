@@ -49,5 +49,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DISTRO_NAME }} ${{ env.DISTRO_VERSION }} main SFS file
-          path: ${{ env.DISTRO_PUPPYSFS }}-${{ env.DISTRO_VERSION }}.tar.xz
+          path: ${{ env.DISTRO_NAME }}-${{ env.DISTRO_VERSION }}.tar.xz
           compression-level: 0 
