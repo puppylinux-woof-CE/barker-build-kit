@@ -1,4 +1,4 @@
-name: Puppy Linux Kernel Build
+name: Build Puppy Main SFS
 
 on:
   #schedule:
