@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Debian testing Desktop Bootstrap Script with Root Password Setup
 # created 20250628
 # modified by mistfire
