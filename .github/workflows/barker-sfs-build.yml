@@ -42,9 +42,11 @@ jobs:
       - name: Building compiling puppy core applications
         shell: bash
         run: |
+             . ./build-settings.cfg
              cp -rf ./puppy-source-builds /
              chmod +x ./external-tools/compile-puppy-core-apps.sh
              ./external-tools/compile-puppy-core-apps.sh
+              cp -rf /usr/local/* $ROOTFS/usr/local/
               
       - name: Packing puppy filesystem into main sfs file
         shell: bash
