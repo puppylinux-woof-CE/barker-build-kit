@@ -1,18 +1,18 @@
 #!/bin/bash
 # Script to install build dependencies for GTK+3, Vala, Python, and systemd-based applications
 
-echo "Updating package lists..."
+#echo "Updating package lists..."
 
-cat > /etc/dpkg/dpkg.cfg.d/50excldoc <<EOF
-path-exclude=/usr/share/doc/*
-path-exclude=/usr/doc/*
-path-exclude=/usr/share/man/*
-path-exclude=/usr/share/common-licenses/*
-path-exclude=/usr/share/info/*
-path-exclude=/usr/share/locale/*
-path-exclude=/usr/share/help/*
-path-exclude=/usr/share/gtk-doc/*
-EOF
+#cat > /etc/dpkg/dpkg.cfg.d/50excldoc <<EOF
+#path-exclude=/usr/share/doc/*
+#path-exclude=/usr/doc/*
+#path-exclude=/usr/share/man/*
+#path-exclude=/usr/share/common-licenses/*
+#path-exclude=/usr/share/info/*
+#path-exclude=/usr/share/locale/*
+#path-exclude=/usr/share/help/*
+#path-exclude=/usr/share/gtk-doc/*
+#EOF
 
 COMPILER_PKGS='
 build-essential
@@ -65,5 +65,6 @@ echo "All required packages for GTK+3, Vala, Python, and systemd application com
 
 for src1 in $(ls /puppy-source-builds)
 do
+   chmod +x /puppy-source-builds/$src1
   /puppy-source-builds/$src1
 done
