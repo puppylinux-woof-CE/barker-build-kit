@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Debian testing Desktop Bootstrap Script with Root Password Setup
 # created 20250628
 # modified by mistfire
@@ -78,11 +78,14 @@ if [ ! -f Packages ];then
  unxz Packages.xz
 fi
 
+
 if [ ! -f ${WKGBASE}/usr/sbin/debootstrap ];then
 
  echo "===> Downloading debootstrap..."
+ 
  DEBfnd="$(grep '^Filename: pool/main/d/debootstrap/debootstrap_' Packages)"
  DEBfnd="${DEBfnd##*/}" #ex: debootstrap_1.0.141devuan1_all.deb
+ 
  wget --no-check-certificate ${DEBOOTSTRAP_URL}${DEBfnd} -O ${DEBfnd}
  echo
  echo "===> Extracting debootstrap without installing..."
@@ -120,6 +123,7 @@ DEBOOTSTRAP_CMD="${WKGBASE}/debootstrap-local/usr/sbin/debootstrap"
 
 # Verify non-busybox dpkg
 DPKG=$(which dpkg)
+
 if [ -L "$DPKG" ]; then
   echo "Error: Busybox dpkg is not sufficient. Install the full 'dpkg' package."
   exit 1
@@ -128,7 +132,9 @@ fi
 
 echo
 echo "===> Cleaning old rootfs if present..."
+
 [ -d ${WKGBASE}/${ROOTFS} ] && rm -rf ${WKGBASE}/${ROOTFS} && sync
+
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d
 
@@ -155,8 +161,6 @@ EOF
 
 if [ "$UNATTENDED_MODE" == "1" ]; then
 
-
-# Avoid installing recommends/suggests
 cat >  ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d/50noninteractive <<EOF
 Dpkg::Options {
   "--force-confdef";
@@ -219,15 +223,30 @@ do
   chroot ${WKGBASE}/${ROOTFS} usermod -a -G ${grp1} root     
 done
 
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'keyboard-configuration keyboard-configuration/layout select ${KEYBOARD_LAYOUT}' | debconf-set-selections"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'keyboard-configuration keyboard-configuration/model select ${KEYBOARD_MODEL}' | debconf-set-selections"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'keyboard-configuration keyboard-configuration/xkb-keymap select ${KEYBOARD_MODEL}' | debconf-set-selections"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'cups-server-common cups-server-common/admin_root boolean false' | debconf-set-selections"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'cups cupsys/raw-print boolean true' | debconf-set-selections"
 
-chroot ${WKGBASE}/${ROOTFS} dpkg-reconfigure --frontend=noninteractive keyboard-configuration cups-server-common
+if [ -f ${WKGBASE}/debconf-preset.conf ]; then
 
-if [ "$UNATTENDED_MODE" == "1" ]; then
+	echo "Applying debconf preset configuration..."
+
+	cp -f ${WKGBASE}/debconf-preset.conf ${WKGBASE}/${ROOTFS}/tmp/debconf-preset.conf
+
+	chroot ${WKGBASE}/${ROOTFS} debconf-set-selections /tmp/debconf-preset.conf
+
+	rm -f ${WKGBASE}/${ROOTFS}/tmp/debconf-preset.conf
+
+fi
+
+
+echo "keyboard-configuration keyboard-configuration/model string $KEYBOARD_MODEL
+keyboard-configuration keyboard-configuration/layout string $KEYBOARD_LAYOUT
+keyboard-configuration keyboard-configuration/variant string
+keyboard-configuration keyboard-configuration/options string
+keyboard-configuration keyboard-configuration/store_defaults boolean true" > ${WKGBASE}/${ROOTFS}/tmp/keyboard-preset.conf
+
+chroot ${WKGBASE}/${ROOTFS} debconf-set-selections /tmp/keyboard-preset.conf
+
+rm -f ${WKGBASE}/${ROOTFS}/tmp/keyboard-preset.conf
+
 
 cat > ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d <<EOF
 #!/bin/sh
@@ -236,7 +255,6 @@ EOF
 
 chmod +x ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
 
-fi
 
 echo
 echo "Basic Debian ${DEBIAN_VERSION_NAME} rootfs created!"
@@ -464,15 +482,11 @@ fi
 
 
 if [ "$UNATTENDED_MODE" == "1" ]; then
-
 	rm -f ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d/50noninteractive
-	rm -f ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
-
 fi
 
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'PURGE' | debconf-communicate keyboard-configuration"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'PURGE' | debconf-communicate cups-server-common"
-chroot ${WKGBASE}/${ROOTFS} /bin/bash -c "echo 'PURGE' | debconf-communicate cupsys"
+[ -f ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d ] && rm -f ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
+
 
 #set init system path
 [ "$INITEXEC_PATH" != "" ] && echo "INITEXEC=${INITEXEC_PATH}" >  ${WKGBASE}/${ROOTFS}/etc/init-system.conf
@@ -489,4 +503,3 @@ unmount_system
 
 echo
 echo "===> Done. Debian ${DEBIAN_VERSION_NAME} puppy rootfs is ready!"
-exit 0
