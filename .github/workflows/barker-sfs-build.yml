@@ -22,7 +22,7 @@ jobs:
           apt-get install -y \
             busybox \
             squashfs-tools wget xz-utils ca-certificates \
-            wget kmod curl cpio coreutils python3
+            wget kmod curl cpio coreutils python3 unzip binutils patch
 
       - name: Building compiling puppy core applications
         shell: bash
