@@ -268,6 +268,8 @@ echo
 echo "===> Updating package lists..."
 chroot ${WKGBASE}/${ROOTFS} apt update
 
+chroot ${WKGBASE}/${ROOTFS} apt full-upgrade -y
+
 echo
 echo "===> Installing desktop environment and packages..."
 
