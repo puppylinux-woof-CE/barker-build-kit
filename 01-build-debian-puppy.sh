@@ -267,7 +267,7 @@ chroot ${WKGBASE}/${ROOTFS} apt modernize-sources -y
 echo
 echo "===> Updating package lists..."
 chroot ${WKGBASE}/${ROOTFS} apt update
-
+chroot ${WKGBASE}/${ROOTFS} apt --fix-broken install
 chroot ${WKGBASE}/${ROOTFS} apt full-upgrade -y
 
 echo
