@@ -97,8 +97,6 @@ mesa-drm-shim
 mesa-utils-bin
 mesa-utils
 mesa-vulkan-drivers
-mesa-va-drivers
-mesa-vdpau-drivers
 libaudio2
 libsndio7.0
 libgl1-mesa-dri
