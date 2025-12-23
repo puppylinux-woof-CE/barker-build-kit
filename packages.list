@@ -102,7 +102,6 @@ mesa-vdpau-drivers
 libaudio2
 libsndio7.0
 libgl1-mesa-dri
-libglx-mesa0
 libegl-mesa0
 libgbm1
 libglw1t64-mesa
