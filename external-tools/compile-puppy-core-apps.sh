@@ -57,6 +57,7 @@ libayatana-appindicator3-dev
 libgtk-layer-shell-dev
 libgtk2.0-dev
 libvte-dev
+libcrypt-dev
 '
 
 apt install -y $(echo $COMPILER_PKGS | tr '\n' ' ')
