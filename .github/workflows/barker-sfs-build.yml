@@ -21,7 +21,7 @@ jobs:
           apt-get update
           apt-get install -y \
             busybox \
-            squashfs-tools wget xz-utils ca-certificates \
+            squashfs-tools wget xz-utils ca-certificates desktop-file-utils \
             wget kmod curl cpio coreutils python3 unzip binutils patch
 
       - name: Building compiling puppy core applications
