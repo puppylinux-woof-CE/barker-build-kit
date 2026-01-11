@@ -60,6 +60,11 @@ libvte-dev
 libcrypt-dev
 '
 
+for ldir in bin lib share/applications share/dbus-1 share/fonts share/icons share/pixmaps sbin
+do
+  [ ! -d /usr/local/$ldir ] && mkdir -p /usr/local/$ldir 
+done
+
 apt install -y $(echo $COMPILER_PKGS | tr '\n' ' ')
 
 echo "All required packages for GTK+3, Vala, Python, and systemd application compilation have been installed."
