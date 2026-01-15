@@ -420,6 +420,14 @@ chroot ${WKGBASE}/${ROOTFS} usermod -a -G sambashare root
 [ ! -d ${WKGBASE}/${ROOTFS}/etc/gdm ] && mkdir -p ${WKGBASE}/${ROOTFS}/etc/gdm
 
 
+if [ -f ${WKGBASE}/${ROOTFS}/usr/share/applications/gdebi.desktop ]; then
+
+	if [ "$(grep -m 1 "Exec=gdebi-gtk " ${WKGBASE}/${ROOTFS}/usr/share/applications/gdebi.desktop 2>/dev/null)" != "" ]; then
+	  sed -i -e "s#Exec=gdebi-gtk\ #Exec=sudo\ -A\ gdebi-gtk\ #g" ${WKGBASE}/${ROOTFS}/usr/share/applications/gdebi.desktop
+	fi
+
+fi
+
 
 echo "[Autologin]
 User=${USERNAME}
