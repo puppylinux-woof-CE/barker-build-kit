@@ -426,6 +426,8 @@ if [ -f ${WKGBASE}/${ROOTFS}/usr/share/applications/gdebi.desktop ]; then
 	  sed -i -e "s#Exec=gdebi-gtk\ #Exec=sudo\ -A\ gdebi-gtk\ #g" ${WKGBASE}/${ROOTFS}/usr/share/applications/gdebi.desktop
 	fi
 
+	chmod +x ${WKGBASE}/${ROOTFS}/usr/local/bin/gdebi-fix.sh 2>/dev/null
+
 fi
 
 
