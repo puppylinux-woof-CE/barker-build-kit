@@ -266,6 +266,7 @@ krdp
 xz-utils
 gzip
 7zip
+7zip-standalone
 gtkterm
 kcharselect
 kmail
