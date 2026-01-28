@@ -898,7 +898,7 @@ case $PUPMODE in
      PRE_PATH="/pupsave-overlay/session"
      mkdir -p /tmp/save1stpup/pupsave-overlay/session
      mkdir -p /tmp/save1stpup/pupsave-overlay/workdir
-     mkdir -p /tmp/save1stpup/pupsave-overlay/sfs-links
+     #mkdir -p /tmp/save1stpup/pupsave-overlay/sfs-links
    else
     PRE_PATH=""
    fi
