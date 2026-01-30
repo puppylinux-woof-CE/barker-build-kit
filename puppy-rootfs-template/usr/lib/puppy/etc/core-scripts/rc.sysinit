@@ -344,8 +344,11 @@ mount_tmpfs(){
 	[ $PUPMODE -eq 2 ] && busybox mount -t tmpfs -o size=${QTRFREERAM}k tmpfs /tmp
 
 	##v2.20 some apps need shm (shared memory) (ex: xfdiff)... 100319 do this always...
-	mkdir -p /dev/shm #120503 if kernel mounts a f.s. on /dev, removes my skeleton /dev
-	busybox mount -t tmpfs -o size=${QTRFREERAM}k shmfs /dev/shm
+	
+	if [ "$(mount | grep "/dev/shm")" == "" ]; then
+		mkdir -p /dev/shm #120503 if kernel mounts a f.s. on /dev, removes my skeleton /dev
+		busybox mount -t tmpfs -o size=${QTRFREERAM}k shmfs /dev/shm
+	fi
 	
 }
 
