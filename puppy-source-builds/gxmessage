@@ -9,16 +9,15 @@ cd "$WORKDIR"
 echo "Downloading sources..."
 
 FILE_URL="https://ftp.gnu.org/pub/gnu/gxmessage/gxmessage-3.4.3.tar.gz"
-FILE_NAME"$(basename $FILE_URL)"
-FLD_NAME="$(basename $FILE_NAME .tar.gz)"
+FILE_NAME=$(basename $FILE_URL)
+FLD_NAME=$(basename $FILE_NAME .tar.gz)
 
-# xdialog (main branch)
 wget -O $FILE_NAME $FILE_URL
 
 echo "Extracting..."
 tar -xzf $FILE_NAME
 
-echo "Building isomaster3..."
+echo "Building gxmessage..."
 cd "$FLD_NAME"
 
 export WITHOUT_NLS=1
