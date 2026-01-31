@@ -58,6 +58,7 @@ libgtk-layer-shell-dev
 libgtk2.0-dev
 libvte-dev
 libcrypt-dev
+intltool
 '
 
 for ldir in bin lib share/applications share/dbus-1 share/fonts share/icons share/pixmaps sbin
