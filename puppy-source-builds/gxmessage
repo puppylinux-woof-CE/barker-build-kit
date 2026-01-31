@@ -1,0 +1,33 @@
+#!/bin/bash
+
+cd /tmp
+
+WORKDIR=$(mktemp -d)
+
+cd "$WORKDIR"
+
+echo "Downloading sources..."
+
+FILE_URL="https://ftp.gnu.org/pub/gnu/gxmessage/gxmessage-3.4.3.tar.gz"
+FILE_NAME"$(basename $FILE_URL)"
+FLD_NAME="$(basename $FILE_NAME .tar.gz)"
+
+# xdialog (main branch)
+wget -O $FILE_NAME $FILE_URL
+
+echo "Extracting..."
+tar -xzf $FILE_NAME
+
+echo "Building isomaster3..."
+cd "$FLD_NAME"
+
+export WITHOUT_NLS=1
+export PREFIX=/usr/local
+
+./configure --prefix=/usr/local
+make
+make install  # Usually goes to /usr/local/bin by default
+
+cd /tmp
+
+rm -rf ${WORKDIR}
