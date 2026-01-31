@@ -376,3 +376,4 @@ python3-pip
 python3-ftputil
 kamoso
 alsa-ucm-conf
+libwacom-bin
