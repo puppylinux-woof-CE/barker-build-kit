@@ -258,7 +258,6 @@ kmenuedit
 kscreen
 power-profiles-daemon
 laptop-detect
-packagekit-tools
 ipp-usb
 avahi-daemon
 print-manager
