@@ -15,7 +15,7 @@ wget -O gearlever.zip \
 echo "Extracting..."
 unzip gearlever.zip
 
-pip install desktop-entry-lib --prefix=/usr/local --no-input --exists-action i --quiet
+pip install desktop-entry-lib --prefix=/usr --no-input --exists-action i --quiet
 
 echo "Building gearlever..."
 cd "gearlever-master"
