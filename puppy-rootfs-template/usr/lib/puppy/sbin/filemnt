@@ -414,7 +414,7 @@ if [ "$MNTEDLOOP" = "" ];then #not mounted on $MOUNTPOINT
      exit
    fi 
     
-   defaultfilemanager $NEWWINDOW "$MOUNTPOINT" &
+   defaultfilemanager "$MOUNTPOINT" &
 
   else
     [ "$CRYPTO" ] && losetup-222 -d $DEVLOOP
