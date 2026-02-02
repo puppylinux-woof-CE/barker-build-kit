@@ -343,7 +343,6 @@ inxi
 vainfo
 va-driver-all
 i965-va-driver-shaders
-pcmanfm-qt
 orca
 espeak
 speech-dispatcher-espeak
@@ -376,3 +375,4 @@ kamoso
 alsa-ucm-conf
 libwacom-bin
 amarok
+konqueror
