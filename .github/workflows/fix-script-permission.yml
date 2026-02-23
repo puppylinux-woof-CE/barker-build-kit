@@ -2,7 +2,7 @@ name: Make Scripts Executable
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch: # Allows you to run this manually
 
 jobs:
@@ -21,9 +21,10 @@ jobs:
           # Replace 'scripts' with your actual folder name
           # This finds all .sh files in the folder and makes them executable
           
-          find puppy-rootfs-template/usr/lib/puppy/bin -type f -name "*" -exec chmod +x {}
-          find puppy-rootfs-template/usr/lib/puppy/sbin -type f -name "*" -exec chmod +x {}
+          find puppy-rootfs-template/usr/lib/puppy/bin -type f -name "*" | xargs -i chmod +x '{}'
+          find puppy-rootfs-template/usr/lib/puppy/sbin -type f -name "*" | xargs -i chmod +x '{}'
 
+          
       - name: Commit changes
         run: |
           git config --global user.name "github-actions[bot]"
