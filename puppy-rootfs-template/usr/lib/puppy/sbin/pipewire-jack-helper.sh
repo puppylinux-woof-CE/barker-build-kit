@@ -14,7 +14,7 @@ for JCKLIB in $PWJACK_LIBS
 do
  
  if [ -f "${PIPEWIRE_JACK_DIR}/${JCKLIB}" ]; then
-  ln -s "${PIPEWIRE_JACK_DIR}/${JCKLIB}" "${TARGET_DIR}/${JCKLIB}"
+    [ ! -f "${TARGET_DIR}/${JCKLIB}" ] && ln -s "${PIPEWIRE_JACK_DIR}/${JCKLIB}" "${TARGET_DIR}/${JCKLIB}"
  fi
  
 done
