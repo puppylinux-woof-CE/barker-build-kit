@@ -1,7 +1,9 @@
 #!/bin/bash
+#written by mistfire
+#helper make all jack apps connect to pipewire by default
 
 TARGET_DIR="/usr/local/lib/x86_64-linux-gnu"
-PIPEWIRE_JACK_DIR="/usr/lib64/pipewire-0.3/jack/"
+PIPEWIRE_JACK_DIR="/usr/lib64/pipewire-0.3/jack"
 
 PWJACK_LIBS="libjack.so libjack.so.0 libjacknet.so libjacknet.so.0 libjackserver.so libjackserver.so.0"
 
