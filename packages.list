@@ -378,8 +378,8 @@ konqueror
 bsdextrautils
 intel-media-va-driver-non-free
 foomatic-db
-foomatic-db-compressed-ppd
 foomatic-db-engine
 foomatic-filters
 foomatic-filters-beh
+openprinting-ppds
 hplip
