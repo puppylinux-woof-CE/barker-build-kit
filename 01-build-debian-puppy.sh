@@ -487,18 +487,21 @@ do
   chroot ${WKGBASE}/${ROOTFS} usermod -a -G ${grp1} root     
 done
 
+#redirect jack apps to pipewire
+if [ -f ${WKGBASE}/${ROOTFS}/usr/lib/puppy/sbin/pipewire-jack-helper.sh ]; then
+	chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/sbin/pipewire-jack-helper.sh
+fi
+
 if [ "$SUDO_GUI" != "" ]; then
    echo "export SUDO_ASKPASS=${SUDO_GUI}" > ${WKGBASE}/${ROOTFS}/etc/profile.d/sudo-askpass.sh
    chmod +x ${WKGBASE}/${ROOTFS}/etc/profile.d/sudo-askpass.sh
 fi
-
 
 if [ "$UNATTENDED_MODE" == "1" ]; then
 	rm -f ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d/50noninteractive
 fi
 
 [ -f ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d ] && rm -f ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
-
 
 #set init system path
 [ "$INITEXEC_PATH" != "" ] && echo "INITEXEC=${INITEXEC_PATH}" >  ${WKGBASE}/${ROOTFS}/etc/init-system.conf
