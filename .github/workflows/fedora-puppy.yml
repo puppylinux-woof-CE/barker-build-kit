@@ -15,11 +15,11 @@ jobs:
         run: |
           dnf install -y wget tar xz squashfs-tools dnf-plugins-core \
           gcc gcc-c++ make automake autoconf gtk2-devel gtk3-devel \
-          libxml2-devel glib2-devel git passwd
+          libxml2-devel glib2-devel git passwd busybox
 
       - name: Initialize RootFS Directory
         run: |
-          mkdir -p ./fedora-rootfs
+          mkdir -p ./build-rootfs
           # Bootstrap the base system
           dnf --installroot=$(pwd)/fedora-rootfs --releasever=43 install -y \
           @core systemd basesystem fedora-release dnf
@@ -69,8 +69,6 @@ jobs:
           build_tool "https://github.com/01micko/gtkdialog.git"
           build_tool "" "https://github.com/v1ne/Xdialog/archive/refs/tags/v2.3.1.tar.gz"
           build_tool "" "https://ftp.gnu.org/gnu/gxmessage/gxmessage-3.0.1.tar.gz"
-          # SystemGenie (Assuming source available via GitHub)
-          build_tool "https://github.com/puppylinux-woof-CE/systemgenie.git" || echo "SystemGenie source not found, skipping."
 
       - name: Configure Users and Passwords
         run: |
