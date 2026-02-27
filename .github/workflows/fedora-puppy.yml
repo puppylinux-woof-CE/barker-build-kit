@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p ./build-rootfs
           # Bootstrap the base system
-          dnf --installroot=$(pwd)/fedora-rootfs --releasever=43 install -y \
+          dnf --installroot=$(pwd)/fedora-rootfs --use-host-config --releasever=43 install -y \
           @core systemd basesystem fedora-release dnf
 
       - name: Install KDE Plasma and Core Features
