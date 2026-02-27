@@ -1,0 +1,97 @@
+name: Build Custom Fedora KDE RootFS
+
+on:
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+
+jobs:
+  build-rootfs:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+      options: --privileged # Necessary for mounting and chroot operations
+
+    steps:
+      - name: Install Host Build Dependencies
+        run: |
+          dnf install -y wget tar xz squashfs-tools dnf-plugins-core \
+          gcc gcc-c++ make automake autoconf gtk2-devel gtk3-devel \
+          libxml2-devel glib2-devel git passwd
+
+      - name: Initialize RootFS Directory
+        run: |
+          mkdir -p ./fedora-rootfs
+          # Bootstrap the base system
+          dnf --installroot=$(pwd)/fedora-rootfs --releasever=43 install -y \
+          @core systemd basesystem fedora-release dnf
+
+      - name: Install KDE Plasma and Core Features
+        run: |
+          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          plasma-desktop plasma-nm plasma-pa plasma-nm-l2tp plasma-nm-pptp \
+          plasma-nm-openvpn plasma-nm-sstp plasma-nm-vpnc \
+          systemsettings kcm_flatpak samba-client krdc krfb \
+          kde-accessibility cups cups-filters hplip \
+          bluez bluez-tools pipewire pipewire-utils pipewire-pulseaudio \
+          pipewire-jack-audio-connection-kit pipewire-alsa
+
+      - name: Install VPN Plugins and Drivers
+        run: |
+          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          NetworkManager-sstp NetworkManager-pptp NetworkManager-l2tp \
+          NetworkManager-libreswan NetworkManager-openvpn NetworkManager-wireguard-plugin \
+          mesa-dri-drivers mesa-vulkan-drivers mesa-va-drivers mesa-vdpau-drivers
+
+      - name: Install Application Suite
+        run: |
+          # Adding RPM Fusion for Amarok and multimedia support if needed
+          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+          
+          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          kwave krecord skanlite kamera k3b ark kate amarok yad \
+          konqueror falkon haruna gwenview gparted filelight discover
+
+      - name: Compile Legacy Tools (gtkdialog, Xdialog, gxmessage, systemgenie)
+        run: |
+          ROOTFS_DIR=$(pwd)/fedora-rootfs
+          
+          # Helper function to build and install to rootfs
+          build_tool() {
+            git clone "$1" build_dir || wget "$2" -O build.tar.gz
+            [ -f build.tar.gz ] && tar -xvf build.tar.gz && cd "$(ls -d */ | head -1)" || cd build_dir
+            ./configure --prefix=/usr || ./autogen.sh --prefix=/usr
+            make -j$(nproc)
+            make DESTDIR=$ROOTFS_DIR install
+            cd ../ && rm -rf build_dir build.tar.gz
+          }
+
+          # Build requirements
+          build_tool "https://github.com/01micko/gtkdialog.git"
+          build_tool "" "https://github.com/v1ne/Xdialog/archive/refs/tags/v2.3.1.tar.gz"
+          build_tool "" "https://ftp.gnu.org/gnu/gxmessage/gxmessage-3.0.1.tar.gz"
+          # SystemGenie (Assuming source available via GitHub)
+          build_tool "https://github.com/puppylinux-woof-CE/systemgenie.git" || echo "SystemGenie source not found, skipping."
+
+      - name: Configure Users and Passwords
+        run: |
+          # Create user puppy
+          chroot ./fedora-rootfs useradd -m -G wheel -p $(openssl passwd -1 puppy) puppy
+          # Set root password
+          echo "root:woofwoof" | chroot ./fedora-rootfs chpasswd
+          # Enable Pipewire-JACK
+          chroot ./fedora-rootfs ln -sf /usr/share/doc/pipewire-jack-audio-connection-kit/ld.so.conf.d/pipewire-jack-x86_64.conf /etc/ld.so.conf.d/
+
+      - name: Final Cleanup
+        run: |
+          dnf --installroot=$(pwd)/fedora-rootfs clean all
+          rm -rf ./fedora-rootfs/var/cache/dnf
+
+      - name: Pack to SquashFS
+        run: |
+          mksquashfs ./fedora-rootfs fedora-kde-puppy.squashfs -b 1M -comp xz
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fedora-kde-rootfs
+          path: fedora-kde-puppy.squashfs
