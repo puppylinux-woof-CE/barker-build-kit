@@ -26,7 +26,7 @@ jobs:
 
       - name: Install KDE Plasma and Core Features
         run: |
-          dnf environment install "KDE Plasma Workspaces" --installroot=$(pwd)/build-rootfs -y 
+          dnf install @kde-desktop --installroot=$(pwd)/build-rootfs -y 
 
       - name: Install VPN Plugins and Drivers
         run: |
@@ -42,7 +42,7 @@ jobs:
           https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
           
           dnf --installroot=$(pwd)/build-rootfs install -y \
-          kwave krecord skanlite kamera k3b ark kate yad \
+          kwave krecord skanlite kamera k3b ark kate yad flatpak \
           konqueror falkon haruna gwenview gparted filelight discover cups gutenprint
 
       - name: Compile Legacy Tools (gtkdialog, Xdialog, gxmessage, systemgenie)
