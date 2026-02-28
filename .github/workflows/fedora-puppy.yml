@@ -26,13 +26,7 @@ jobs:
 
       - name: Install KDE Plasma and Core Features
         run: |
-          dnf --installroot=$(pwd)/fedora-rootfs --skip-unavailable install -y \
-          plasma-desktop plasma-nm plasma-pa plasma-nm-l2tp plasma-nm-pptp \
-          plasma-nm-openvpn plasma-nm-sstp plasma-nm-vpnc \
-          systemsettings kcm_flatpak samba-client krdc krfb \
-          kde-accessibility cups cups-filters hplip \
-          bluez bluez-tools pipewire pipewire-utils pipewire-pulseaudio \
-          pipewire-jack-audio-connection-kit pipewire-alsa
+          dnf groupinstall "KDE Plasma Workspace"  --installroot=$(pwd)/fedora-rootfs -y 
 
       - name: Install VPN Plugins and Drivers
         run: |
@@ -48,8 +42,8 @@ jobs:
           https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
           
           dnf --installroot=$(pwd)/fedora-rootfs install -y \
-          kwave krecord skanlite kamera k3b ark kate amarok yad \
-          konqueror falkon haruna gwenview gparted filelight discover
+          kwave krecord skanlite kamera k3b ark kate yad \
+          konqueror falkon haruna gwenview gparted filelight discover cups gutenprint
 
       - name: Compile Legacy Tools (gtkdialog, Xdialog, gxmessage, systemgenie)
         run: |
