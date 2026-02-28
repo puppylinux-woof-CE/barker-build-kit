@@ -1,4 +1,4 @@
-name: Build Custom Fedora KDE RootFS
+name: Build Custom Fedora KDE RootFS (Testing)
 
 on:
   workflow_dispatch: # Allows you to run this manually from the Actions tab
@@ -21,16 +21,16 @@ jobs:
         run: |
           mkdir -p ./build-rootfs
           # Bootstrap the base system
-          dnf --installroot=$(pwd)/fedora-rootfs --use-host-config --releasever=43 install -y \
+          dnf --installroot=$(pwd)/build-rootfs --use-host-config --releasever=43 install -y \
           @core systemd basesystem fedora-release dnf
 
       - name: Install KDE Plasma and Core Features
         run: |
-          dnf groupinstall "KDE Plasma Workspace"  --installroot=$(pwd)/fedora-rootfs -y 
+          dnf environment install "KDE Plasma Workspaces" --installroot=$(pwd)/build-rootfs -y 
 
       - name: Install VPN Plugins and Drivers
         run: |
-          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          dnf --installroot=$(pwd)/build-rootfs install -y \
           NetworkManager-sstp NetworkManager-pptp NetworkManager-l2tp \
           NetworkManager-libreswan NetworkManager-openvpn NetworkManager-wireguard-plugin \
           mesa-dri-drivers mesa-vulkan-drivers mesa-va-drivers mesa-vdpau-drivers
@@ -38,16 +38,16 @@ jobs:
       - name: Install Application Suite
         run: |
           # Adding RPM Fusion for Amarok and multimedia support if needed
-          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          dnf --installroot=$(pwd)/build-rootfs install -y \
           https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
           
-          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          dnf --installroot=$(pwd)/build-rootfs install -y \
           kwave krecord skanlite kamera k3b ark kate yad \
           konqueror falkon haruna gwenview gparted filelight discover cups gutenprint
 
       - name: Compile Legacy Tools (gtkdialog, Xdialog, gxmessage, systemgenie)
         run: |
-          ROOTFS_DIR=$(pwd)/fedora-rootfs
+          ROOTFS_DIR=$(pwd)/build-rootfs
           
           # Helper function to build and install to rootfs
           build_tool() {
@@ -67,20 +67,20 @@ jobs:
       - name: Configure Users and Passwords
         run: |
           # Create user puppy
-          chroot ./fedora-rootfs useradd -m -G wheel -p $(openssl passwd -1 puppy) puppy
+          chroot ./build-rootfs useradd -m -G wheel -p $(openssl passwd -1 puppy) puppy
           # Set root password
-          echo "root:woofwoof" | chroot ./fedora-rootfs chpasswd
+          echo "root:woofwoof" | chroot ./build-rootfs chpasswd
           # Enable Pipewire-JACK
-          chroot ./fedora-rootfs ln -sf /usr/share/doc/pipewire-jack-audio-connection-kit/ld.so.conf.d/pipewire-jack-x86_64.conf /etc/ld.so.conf.d/
+          chroot ./build-rootfs ln -sf /usr/share/doc/pipewire-jack-audio-connection-kit/ld.so.conf.d/pipewire-jack-x86_64.conf /etc/ld.so.conf.d/
 
       - name: Final Cleanup
         run: |
-          dnf --installroot=$(pwd)/fedora-rootfs clean all
-          rm -rf ./fedora-rootfs/var/cache/dnf
+          dnf --installroot=$(pwd)/build-rootfs clean all
+          rm -rf ./build-rootfs/var/cache/dnf
 
       - name: Pack to SquashFS
         run: |
-          mksquashfs ./fedora-rootfs fedora-kde-puppy.squashfs -b 1M -comp xz
+          mksquashfs ./build-rootfs fedora-kde-puppy.squashfs -b 1M -comp xz
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
