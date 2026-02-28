@@ -26,7 +26,7 @@ jobs:
 
       - name: Install KDE Plasma and Core Features
         run: |
-          dnf --installroot=$(pwd)/fedora-rootfs install -y \
+          dnf --installroot=$(pwd)/fedora-rootfs --skip-unavailable install -y \
           plasma-desktop plasma-nm plasma-pa plasma-nm-l2tp plasma-nm-pptp \
           plasma-nm-openvpn plasma-nm-sstp plasma-nm-vpnc \
           systemsettings kcm_flatpak samba-client krdc krfb \
