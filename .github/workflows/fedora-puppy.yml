@@ -41,7 +41,7 @@ jobs:
           dnf --installroot=$(pwd)/build-rootfs install -y \
           https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
           
-          dnf --installroot=$(pwd)/build-rootfs install -y \
+          dnf --installroot=$(pwd)/build-rootfs install -y --skip-unavailable \
           kwave krecord skanlite kamera k3b ark kate yad flatpak \
           konqueror falkon haruna gwenview gparted filelight discover cups gutenprint
 
