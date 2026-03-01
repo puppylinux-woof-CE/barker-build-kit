@@ -43,26 +43,7 @@ jobs:
           
           dnf --installroot=$(pwd)/build-rootfs install -y --skip-unavailable \
           kwave krecord skanlite kamera k3b ark kate yad flatpak \
-          konqueror falkon haruna gwenview gparted filelight discover cups gutenprint
-
-      - name: Compile Legacy Tools (gtkdialog, Xdialog, gxmessage, systemgenie)
-        run: |
-          ROOTFS_DIR=$(pwd)/build-rootfs
-          
-          # Helper function to build and install to rootfs
-          build_tool() {
-            git clone "$1" build_dir || wget "$2" -O build.tar.gz
-            [ -f build.tar.gz ] && tar -xvf build.tar.gz && cd "$(ls -d */ | head -1)" || cd build_dir
-            ./configure --prefix=/usr || ./autogen.sh --prefix=/usr
-            make -j$(nproc)
-            make DESTDIR=$ROOTFS_DIR install
-            cd ../ && rm -rf build_dir build.tar.gz
-          }
-
-          # Build requirements
-          build_tool "https://github.com/01micko/gtkdialog.git"
-          build_tool "" "https://github.com/v1ne/Xdialog/archive/refs/tags/v2.3.1.tar.gz"
-          build_tool "" "https://ftp.gnu.org/gnu/gxmessage/gxmessage-3.0.1.tar.gz"
+          konqueror falkon haruna gwenview gparted filelight discover cups gutenprint foomatic
 
       - name: Configure Users and Passwords
         run: |
