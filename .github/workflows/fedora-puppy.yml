@@ -30,9 +30,9 @@ jobs:
 
       - name: Install VPN Plugins and Drivers
         run: |
-          dnf --installroot=$(pwd)/build-rootfs install -y \
+          dnf --installroot=$(pwd)/build-rootfs install -y --skip-unavailable \
           NetworkManager-sstp NetworkManager-pptp NetworkManager-l2tp \
-          NetworkManager-libreswan NetworkManager-openvpn NetworkManager-wireguard-plugin \
+          NetworkManager-libreswan NetworkManager-openvpn NetworkManager-wireguard \
           mesa-dri-drivers mesa-vulkan-drivers mesa-va-drivers mesa-vdpau-drivers
 
       - name: Install Application Suite
