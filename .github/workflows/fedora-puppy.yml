@@ -47,12 +47,8 @@ jobs:
 
       - name: Configure Users and Passwords
         run: |
-          # Create user puppy
-          chroot ./build-rootfs useradd -m -G wheel -p $(openssl passwd -1 puppy) puppy
-          # Set root password
-          echo "root:woofwoof" | chroot ./build-rootfs chpasswd
-          # Enable Pipewire-JACK
-          chroot ./build-rootfs ln -sf /usr/share/doc/pipewire-jack-audio-connection-kit/ld.so.conf.d/pipewire-jack-x86_64.conf /etc/ld.so.conf.d/
+            chroot $(pwd)/build-rootfs useradd -m -s /bin/bash -c puppy puppy
+            echo "puppy:puppy" | chroot $(pwd)/build-rootfs chpasswd
 
       - name: Final Cleanup
         run: |
