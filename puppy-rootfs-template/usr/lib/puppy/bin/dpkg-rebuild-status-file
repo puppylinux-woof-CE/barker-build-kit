@@ -1,0 +1,34 @@
+#!/bin/bash
+
+SRC_DIR="/var/lib/dpkg/installed"
+OUT_FILE="/var/lib/dpkg/status.rebuilt"
+
+if [ ! -d $SRC_DIR ]; then
+  echo "$SRC_DIR folder not exists"
+  exit 1
+fi
+
+> "$OUT_FILE"
+
+for file in "$SRC_DIR"/*; do
+    [ -f "$file" ] || continue
+
+    # Validate it looks like a package record
+    if ! grep -q "^Package: " "$file"; then
+        continue
+    fi
+
+    awk '
+    BEGIN { started=0 }
+    {
+        if (!started && $0=="") next
+        started=1
+        print
+    }
+    END { print "" }
+    ' "$file" >> "$OUT_FILE"
+    
+done
+
+mv -f /var/lib/dpkg/status /var/lib/dpkg/status-old
+mv -f /var/lib/dpkg/status.rebuilt /var/lib/dpkg/status
