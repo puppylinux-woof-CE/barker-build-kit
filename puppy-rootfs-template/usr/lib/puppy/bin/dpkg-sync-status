@@ -1,0 +1,42 @@
+#!/bin/bash
+
+STATUS_FILE="/var/lib/dpkg/status"
+OUT_DIR="/var/lib/dpkg/installed"
+
+mkdir -p "$OUT_DIR"
+
+# dpkg sets this during package operations
+PKG="${DPKG_MAINTSCRIPT_PACKAGE:-}"
+
+# Fallback: detect last touched package (less reliable but safe fallback)
+if [[ -z "$PKG" ]]; then
+    exit 0
+fi
+
+# Extract only this package block
+awk -v pkg="$PKG" -v outdir="$OUT_DIR" '
+BEGIN { RS=""; FS="\n" }
+{
+    found=0
+    status=""
+
+    for (i=1; i<=NF; i++) {
+        if ($i == "Package: " pkg) found=1
+        if ($i ~ /^Status: /) status=$i
+    }
+
+    if (found) {
+        # If package is removed/purged → delete file
+        if (status ~ /not-installed|config-files/) {
+            file = outdir "/" pkg
+            if (system("[ -f \"" file "\" ]") == 0) {
+                system("rm -f \"" file "\"")
+            }
+        } else {
+            file = outdir "/" pkg
+            print $0 "\n" > file
+            close(file)
+        }
+    }
+}
+' "$STATUS_FILE"
