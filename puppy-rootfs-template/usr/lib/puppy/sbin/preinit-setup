@@ -204,6 +204,12 @@ update_cache_files() {
 	
 	basic_update
 	extended_update
+
+	if [ ! -e /var/lib/dpkg/lock ] && [ ! -e /var/lib/dpkg/lock-frontend ]; then
+	  if [ -d /var/lib/dpkg ] && [ "$(which dpkg-rebuild-status-file)" != "" ]; then
+	    echo "Rebuilding dpkg status file..."
+	  fi
+	fi
 		
 	KMODFLDCOUNT="$(find $INITRD_FLD -type d -name $KERNVER -maxdepth 6 2>/dev/null | grep "/lib/modules" | grep -vE "pup_disk|pup_rw|pup_ro1\/|pup_ro2\/|pup_loop|\/mnt\/" | wc -l)"
 	
