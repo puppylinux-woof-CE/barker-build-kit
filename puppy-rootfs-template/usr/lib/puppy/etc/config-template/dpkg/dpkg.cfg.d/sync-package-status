@@ -1,0 +1,1 @@
+post-invoke=/usr/lib/puppy/bin/dpkg-sync-status
