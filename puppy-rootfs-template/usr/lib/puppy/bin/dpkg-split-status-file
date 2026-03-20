@@ -1,0 +1,32 @@
+#!/bin/bash
+
+INPUT="/var/lib/dpkg/status"
+OUTPUT_DIR="/var/lib/dpkg/installed"
+
+if [ ! -f $INPUT ]; then
+  echo "dpkg status file not exists"
+  exit 1
+fi
+
+[ ! -d $OUTPUT_DIR ] && mkdir -p "$OUTPUT_DIR"
+  
+awk -v outdir="$OUTPUT_DIR" '
+BEGIN {
+    RS=""; FS="\n"
+}
+{
+    pkg=""
+    for (i = 1; i <= NF; i++) {
+        if ($i ~ /^Package: /) {
+            pkg = substr($i, 10)
+            break
+        }
+    }
+
+    if (pkg != "") {
+        file = outdir "/" pkg
+        print $0 "\n" > file
+        close(file)
+    }
+}
+' "$INPUT"
