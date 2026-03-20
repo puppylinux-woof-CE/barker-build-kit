@@ -26,7 +26,7 @@ echo "Updating gdk pixbuf..."
 
 if [ "$(which update-gdk-pixbuf-loaders)" != "" ]; then
  update-gdk-pixbuf-loaders
-else
+elif [ "$(which gdk-pixbuf-query-loaders)" != "" ]; then
  gdk-pixbuf-query-loaders --update-cache
 fi
 
@@ -44,7 +44,7 @@ echo "Updating gtk im modules..."
 for gtkver in $GTKVERLIST
 do
  if [ "$(which gtk-query-immodules-$gtkver)" != "" ]; then 
-  if [ $(which update-gtk-immodules-$gtkver) != "" ]; then
+  if [ "$(which update-gtk-immodules-$gtkver)" != "" ]; then
    update-gtk-immodules-$gtkver
   else
    gtk-query-immodules-$gtkver --update-cache
@@ -93,6 +93,9 @@ ldconfig
 echo "Updating dconf ..." 
 dconf update
 
+echo  "Updating the shadow group file..."
+grpconv
+
 echo "Updating udev rules ..."
  
 [ "$(udevadm --help 2>&1 | grep hwdb)" != "" ] && udevadm hwdb --update
@@ -102,10 +105,15 @@ if [ "$(pidof udevd systemd-udevd)" != "" ]; then
 	udevadm trigger
 fi
 
-
-if [ "$SKIPDEPMOD" == "" ]; then
- echo "Updating kernel modules ..." 
- depmod -a
+if [ ! -e /var/lib/dpkg/lock ] && [ ! -e /var/lib/dpkg/lock-frontend ]; then
+  if [ "$(which dpkg-rebuild-status-file)" != "" ]; then
+    echo "Rebuilding dpkg status file..."
+  fi
 fi
 
-grpconv
+if [ "$SKIPDEPMOD" == "" ]; then
+  echo "Updating kernel modules ..." 
+  depmod -a
+fi
+
+
