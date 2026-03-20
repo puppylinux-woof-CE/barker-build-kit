@@ -229,6 +229,12 @@ extended_update() {
 	 fi
 	done
 
+	if [ ! -e /var/lib/dpkg/lock ] && [ ! -e /var/lib/dpkg/lock-frontend ]; then
+  	  if [ -d /var/lib/dpkg ] && [ "$(which dpkg-rebuild-status-file)" != "" ]; then
+        echo "Rebuilding dpkg status file..."
+      fi
+    fi
+
 }
 
 update_cache_files() {
