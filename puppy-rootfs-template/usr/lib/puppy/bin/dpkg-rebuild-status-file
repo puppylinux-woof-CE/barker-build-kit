@@ -8,8 +8,6 @@ if [ ! -d $SRC_DIR ]; then
   exit 1
 fi
 
-> "$OUT_FILE"
-
 for file in "$SRC_DIR"/*; do
     [ -f "$file" ] || continue
 
