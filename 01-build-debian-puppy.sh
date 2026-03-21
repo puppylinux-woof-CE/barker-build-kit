@@ -512,6 +512,8 @@ cp -f ${WKGBASE}/external-tools/update-system-packages ${WKGBASE}/${ROOTFS}/usr/
 
 chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/dpkg-split-status-file
 
+echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf 
+
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
 
 echo
