@@ -2,31 +2,38 @@
 
 SRC_DIR="/var/lib/dpkg/installed"
 OUT_FILE="/var/lib/dpkg/status.rebuilt"
+TMP_FILE="$(mktemp)"
 
-if [ ! -d $SRC_DIR ]; then
-  echo "$SRC_DIR folder not exists"
-  exit 1
-fi
+[ -d "$SRC_DIR" ] || {
+    echo "Missing directory: $SRC_DIR" >&2
+    exit 1
+}
 
-for file in "$SRC_DIR"/*; do
-    [ -f "$file" ] || continue
+# Single pass over all files (no per-file grep/awk)
+awk '
+FNR==1 {
+    valid=0
+    started=0
+}
 
-    # Validate it looks like a package record
-    if ! grep -q "^Package: " "$file"; then
-        continue
-    fi
+# Detect valid package file
+/^Package: / { valid=1 }
 
-    awk '
-    BEGIN { started=0 }
-    {
-        if (!started && $0=="") next
-        started=1
-        print
-    }
-    END { print "" }
-    ' "$file" >> "$OUT_FILE"
-    
-done
+# Skip leading blank lines
+{
+    if (!valid) next
+    if (!started && $0=="") next
+    started=1
+    print
+}
 
+# Add separator between files
+ENDFILE {
+    if (valid && started) print ""
+}
+' "$SRC_DIR"/* > "$TMP_FILE"
+
+# Atomic replace
 mv -f /var/lib/dpkg/status /var/lib/dpkg/status-old
-mv -f /var/lib/dpkg/status.rebuilt /var/lib/dpkg/status
+mv -f "$TMP_FILE" "$OUT_FILE"
+mv -f "$OUT_FILE" /var/lib/dpkg/status
