@@ -105,10 +105,11 @@ if [ "$(pidof udevd systemd-udevd)" != "" ]; then
 	udevadm trigger
 fi
 
-if [ ! -e /var/lib/dpkg/lock ] && [ ! -e /var/lib/dpkg/lock-frontend ]; then
-  if [ "$(which dpkg-rebuild-status-file)" != "" ]; then
-    echo "Rebuilding dpkg status file..."
-  fi
+if [ -d /var/lib/dpkg ] && [ "$(which dpkg-rebuild-status-file)" != "" ]; then
+	if [ "$(pidof dpkg)" == "" ]; then
+	  echo "Rebuilding dpkg status file..."
+	  dpkg-rebuild-status-file
+	fi
 fi
 
 if [ "$SKIPDEPMOD" == "" ]; then
