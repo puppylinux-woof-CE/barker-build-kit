@@ -229,9 +229,12 @@ extended_update() {
 	 fi
 	done
 
-  	if [ -d /var/lib/dpkg ] && [ "$(which dpkg-rebuild-status-file)" != "" ]; then
-        [ "$(pidof dpkg)" == "" ] && echo "Rebuilding dpkg status file..."
-    fi
+	if [ -d /var/lib/dpkg ] && [ "$(which dpkg-rebuild-status-file)" != "" ]; then
+        if [ "$(pidof dpkg)" == "" ]; then
+ 		  echo "Rebuilding dpkg status file..."
+    	  dpkg-rebuild-status-file
+		fi
+	fi
 
 }
 
