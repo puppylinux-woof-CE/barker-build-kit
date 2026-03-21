@@ -267,6 +267,8 @@ fi
 
 cp -f ${WKGBASE}/external-tools/update-system-packages ${WKGBASE}/${ROOTFS}/usr/local/bin/update-system-packages
 
+echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
+
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
 
 echo
