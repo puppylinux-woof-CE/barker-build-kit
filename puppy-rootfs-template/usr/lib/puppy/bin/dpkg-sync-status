@@ -16,8 +16,7 @@ mapfile -t installed_pkgs < <(
 )
 
 # Build unique list (symmetric difference)
-unique_pkgs=$(printf "%s\n" "${status_pkgs[@]}" "${installed_pkgs[@]}" \
-    | sort | uniq -u)
+unique_pkgs=$(printf "%s\n" "${status_pkgs[@]}" "${installed_pkgs[@]}" | sort | uniq -u)
 
 # Process each package
 for pkg in $unique_pkgs
