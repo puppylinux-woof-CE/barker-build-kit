@@ -158,6 +158,11 @@ create_zram_swap() {
 
 }
 
+enable_zswap(){
+   modprobe zswap 2>/dev/null
+   [ -e /sys/module/zswap/parameters/enabled ] && echo 1 > /sys/module/zswap/parameters/enabled 
+}	
+
 loadswap_func() { #w481 made into a function.
 	
  echo "LOAD SWAP"
@@ -187,7 +192,10 @@ loadswap_func() { #w481 made into a function.
   
  done
  
- [ "$SWAPON" = "yes" ] && return
+ if [ "$SWAPON" = "yes" ]; then
+   enable_zswap
+   return
+ fi
  
  #if no go, try for a swap file...
  if [ -f ${INITRD_FLD}${PUP_HOME}/pupswap.swp ] ; then
@@ -205,6 +213,7 @@ loadswap_func() { #w481 made into a function.
  
   if [ $ret -eq 0 ] ; then
     [ "$SWAPSIZEBYTES" ] && EXTRAALLOCK=$(($EXTRAALLOCK + $SWAPSIZEBYTES))
+    enable_zswap
     SWAPON="yes"
     return
   fi
@@ -212,21 +221,19 @@ loadswap_func() { #w481 made into a function.
  fi
  
  # if we failed to find a swap partition or file, try zram
- 
- if [ "$(swapon --show | grep "/dev/zram")" == "" ]; then
-     
-     if [ "$BOOT_MODE" != "systemd" ]; then
-     
-		 echo -n "Loading zram swap ..." >/dev/console
-		 create_zram_swap
-		 ret=$?
-		 
-		 status_func $ret
- 
+      
+ if [ "$BOOT_MODE" != "systemd" ]; then
+	 
+	 if [ "$(swapon --show | grep "/dev/zram")" == "" ]; then	
+		echo -n "Loading zram swap ..." >/dev/console
+		create_zram_swap
+		ret=$?
+	 
+		status_func $ret
 	 fi
- 
+
  fi
- 
+
  [ $ret -eq 0 ] && SWAPON="yes"
  
 }
@@ -270,29 +277,16 @@ build_sw_raid(){
 mount_cgroups(){
 	
 # Mount Control Groups filesystem interface:
-if grep -wq cgroup /proc/filesystems ; then
+if grep -m 1 cgroup2 /proc/filesystems ; then
 
     if [ -d /sys/fs/cgroup ]; then
 
-        # See linux-*/Documentation/admin-guide/cgroup-v1/cgroups.rst (section 1.6)
-        # Check if we have some tools to autodetect the available cgroup controllers
-        # Mount a tmpfs as the cgroup filesystem root
-        mount -t tmpfs -o mode=0755,size=8M cgroup_root /sys/fs/cgroup
-    
-        # Autodetect available controllers and mount them in subfolders
-        controllers="$(cut -f 1 /proc/cgroups | tail -n +2)"
-       
-        for i in $controllers
-        do
-          mkdir /sys/fs/cgroup/$i
-          mount -t cgroup -o $i $i /sys/fs/cgroup/$i
-        done
-       
-        unset i controllers
-
-    else
-      mkdir -p /dev/cgroup
-      mount -t cgroup cgroup /dev/cgroup
+		if vercmp $KERNVER ge 5.7; then
+			busybox mount -t cgroup2 -o nsdelegate,memory_recursiveprot cgroup2 /sys/fs/cgroup
+		else
+			busybox mount -t cgroup2 -o nsdelegate cgroup2 /sys/fs/cgroup
+		fi
+      
     fi
     
 fi	
