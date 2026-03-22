@@ -609,6 +609,14 @@ if [ "$BOOT_MODE" == "" ]; then
 
 fi
 
+#load schedulers
+if [ "$SYSINIT_SETUP" != "" ]; then
+	for schd in bfq mq-deadline kyber-iosched
+	do
+	  modprobe $schd 2>/dev/null
+	done
+fi
+
 export ROOT_FSTYPE="$(mount | grep " on / " | awk '{ print $5 }')"
 
 echo -n "Making the filesystem usable..." > $TTY_OUTPUT
@@ -901,29 +909,15 @@ if [ "$SYSINIT_SETUP" != "" ]; then
 	#only needed for 2.6.21.7, as 2.6.25.x loads these automatically...
 	#explicitly load battery, ac, thermal, fan modules.
 	modprobe battery
+	modprobe input-leds 2>/dev/null
 	
-	if [ -f /proc/config.gz ]; then
-		zcat /proc/config.gz | grep -m 1 -q '^CONFIG_INPUT_LEDS=m' && modprobe input-leds #for >= k4.2x
-	fi
-
 	ISITAMAC=`grep -i -m 1 '^apple' /sys/class/dmi/id/board_vendor`
 
-	if [ -z "$ISITAMAC" ];then #don't run this block on mac
-	 if [ -d /proc/acpi/battery ]; then
-	 
-	  results="`find /proc/acpi/battery -mindepth 1 -type d`"
-
-	  if [ ! -z "$results" ]; then
+	if [ -z "$ISITAMAC" ]; then #don't run this block on mac
 	   modprobe ac
 	   modprobe thermal
 	   modprobe fan
-	  else
-	   rmmod battery
-	  fi
-
-	 fi
 	fi
-
 
 	if [ $PUPMODE -eq 2 ] ; then #full hd installation.
 		 
@@ -1077,6 +1071,10 @@ fi
 
 ##############USER SELECTED MODULES##################
 echo "USER SELECTED MODULES"
+
+if [ "$SYSINIT_SETUP" != "" ]; then
+	cat /etc/modules-load.d/*.conf 2>/dev/null | sed 's/#.*//; /^[[:space:]]*$/d' | xargs -r -n 1 modprobe
+fi
 
 #the user can select extra modules to load in the BootManager...
 if [ "$ADDLIST" != "" ];then #variable is in /etc/rc.d/MODULESCONFIG
