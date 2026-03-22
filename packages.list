@@ -9,7 +9,6 @@ eject
 systemd
 systemd-cron
 earlyoom
-systemd-zram-generator
 systemd-bootchart
 systemd-timesyncd
 networkd-dispatcher
