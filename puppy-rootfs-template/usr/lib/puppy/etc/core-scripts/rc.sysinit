@@ -230,16 +230,12 @@ loadswap_func() { #w481 made into a function.
  
  # if we failed to find a swap partition or file, try zram
       
- if [ "$BOOT_MODE" != "systemd" ]; then
-	 
-	 if [ "$(swapon --show | grep "/dev/zram")" == "" ]; then	
-		echo -n "Loading zram swap ..." >/dev/console
-		create_zram_swap
-		ret=$?
-	 
-		status_func $ret
-	 fi
-
+ if [ "$(swapon --show | grep "/dev/zram")" == "" ]; then	
+	echo -n "Loading zram swap ..." >/dev/console
+	create_zram_swap
+	ret=$?
+ 
+	status_func $ret
  fi
 
  [ $ret -eq 0 ] && SWAPON="yes"
