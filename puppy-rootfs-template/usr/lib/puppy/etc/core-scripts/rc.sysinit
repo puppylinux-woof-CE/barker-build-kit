@@ -152,15 +152,23 @@ create_zram_swap() {
   
   RAM=`awk '/MemTotal/{print $2}' /proc/meminfo`
   
-  echo ${RAM}000 > /sys/block/zram0/disksize || return 1
+  zRAMSIZE=$(expr 15 \* 100 / $RAM)
+  
+  echo $zRAMSIZE > /sys/block/zram0/disksize || return 1
   mkswap /dev/zram0 || return 1
   swapon /dev/zram0
 
 }
 
 enable_zswap(){
-   modprobe zswap 2>/dev/null
-   [ -e /sys/module/zswap/parameters/enabled ] && echo 1 > /sys/module/zswap/parameters/enabled 
+      
+   if [ -e /sys/module/zswap ]; then
+     echo 1 > /sys/module/zswap/parameters/enabled
+     echo "lz4" > /sys/module/zswap/parameters/compressor 
+     echo 15 > /sys/module/zswap/parameters/max_pool_percent
+     echo 1 > /sys/module/zswap/parameters/shrinker_enabled
+   fi
+   
 }	
 
 loadswap_func() { #w481 made into a function.
