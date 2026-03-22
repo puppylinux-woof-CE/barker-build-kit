@@ -413,9 +413,6 @@ chroot ${WKGBASE}/${ROOTFS} chmod 775 /var/lib/samba/usershares 2>/dev/null
 
 chroot ${WKGBASE}/${ROOTFS} flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-chroot ${WKGBASE}/${ROOTFS} usermod -a -G sambashare ${USERNAME}
-chroot ${WKGBASE}/${ROOTFS} usermod -a -G sambashare root
-
 [ ! -d ${WKGBASE}/${ROOTFS}/etc/sddm.conf.d ] && mkdir -p ${WKGBASE}/${ROOTFS}/etc/sddm.conf.d
 [ ! -d ${WKGBASE}/${ROOTFS}/etc/gdm ] && mkdir -p ${WKGBASE}/${ROOTFS}/etc/gdm
 
