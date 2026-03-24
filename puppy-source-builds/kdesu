@@ -22,7 +22,7 @@ apt install -y \
     libkf6windowsystem-dev
 
 # Define build directory
-BUILD_DIR="$HOME/kde_build_temp"
+BUILD_DIR="/tmp/kde_build_temp"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
@@ -48,6 +48,7 @@ sudo make install
 
 ln -sf /usr/local/libexec/kf6/kdesu /usr/local/bin/kdesu
 ln -sf /usr/local/bin/kdesu /usr/local/bin/gksu
+ln -sf /usr/local/bin/kdesu /usr/local/bin/gksudo
 
 echo "--- Cleanup ---"
 cd ~
