@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Exit on any error
+set -e
+
+echo "--- Updating package lists and installing dependencies ---"
+sudo apt update
+sudo apt install -y \
+    build-essential \
+    cmake \
+    extra-cmake-modules \
+    git \
+    gettext \
+    libkf6config-dev \
+    libkf6iconthemes-dev \
+    libkf6kio-dev \
+    libkf6i18n-dev \
+    libkf6su-dev \
+    qt6-base-dev \
+    libkf6doctools-dev \
+    libkf6notifications-dev \
+    libkf6pty-dev \
+    libkf6windowsystem-dev
+
+# Define build directory
+BUILD_DIR="$HOME/kde_build_temp"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+echo "--- Cloning kde-cli-tools repository ---"
+if [ -d "kde-cli-tools" ]; then
+    rm -rf kde-cli-tools
+fi
+git clone https://invent.kde.org/plasma/kde-cli-tools.git
+cd kde-cli-tools
+
+echo "--- Configuring with CMake (Prefix: /usr/local) ---"
+mkdir build && cd build
+cmake .. \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+
+echo "--- Compiling ---"
+make -j$(nproc)
+
+echo "--- Installing to /usr/local ---"
+sudo make install
+
+ln -sf /usr/local/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/kdesu
+
+echo "--- Cleanup ---"
+cd ~
+rm -rf "$BUILD_DIR"
+
+echo "-------------------------------------------------------"
+echo "Installation Complete!"
+echo "kdesu is likely located at: /usr/local/lib/x86_64-linux-gnu/libexec/kf6/kdesu"
+echo "You may want to symlink it to /usr/local/bin for easy access:"
+echo "sudo ln -sf /usr/local/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/kdesu"
+echo "-------------------------------------------------------"
