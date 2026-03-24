@@ -33,6 +33,7 @@ jobs:
           
           git add puppy-rootfs-template/usr/lib/puppy/bin/*
           git add puppy-rootfs-template/usr/lib/puppy/sbin/*
+          git add puppy-source-builds/*
           git add ./*.sh
           
           # Only commit if there are actually changes to avoid workflow errors
