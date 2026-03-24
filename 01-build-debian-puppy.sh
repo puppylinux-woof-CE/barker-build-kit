@@ -466,6 +466,12 @@ EOF
 chroot ${WKGBASE}/${ROOTFS} systemctl disable openvpn smartmontools ldconfig strongswan-starter nvmefc-boot-connections.service nvmf-autoconnect.service smbd nmbd NetworkManager-wait-online
 chroot ${WKGBASE}/${ROOTFS} systemctl enable acpid thermald
 
+if [ -e ${WKGBASE}/${ROOTFS}/usr/lib/x86_64-linux-gnu/libexec/kf6/kdesu ]; then
+ chroot ${WKGBASE}/${ROOTFS}/usr/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/kdesu
+ chroot ${WKGBASE}/${ROOTFS}/usr/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/gksu
+ chroot ${WKGBASE}/${ROOTFS}/usr/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/gksudo
+fi
+
 echo
 echo "===> Creating groups and adding user account..."
 
