@@ -23,6 +23,7 @@ jobs:
           
           find puppy-rootfs-template/usr/lib/puppy/bin -type f -name "*" | xargs -i chmod +x '{}'
           find puppy-rootfs-template/usr/lib/puppy/sbin -type f -name "*" | xargs -i chmod +x '{}'
+          find puppy-source-builds -type f -name "*" | xargs -i chmod +x '{}'
           find ./ -type f -name "*.sh" | xargs -i chmod +x '{}'
         
       - name: Commit changes
