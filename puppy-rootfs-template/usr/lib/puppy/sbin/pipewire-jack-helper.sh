@@ -7,7 +7,7 @@ PIPEWIRE_JACK_DIR="/usr/lib/x86_64-linux-gnu/pipewire-0.3/jack"
 
 PWJACK_LIBS="libjack.so libjack.so.0 libjacknet.so libjacknet.so.0 libjackserver.so libjackserver.so.0"
 
-[ ! -d "$PIPEWIRE_JACK_DIR" ] && exit
+[ ! -d "$PIPEWIRE_JACK_DIR" ] && exit 0
 [ ! -d "$TARGET_DIR" ] && mkdir -p "$TARGET_DIR"
 
 for JCKLIB in $PWJACK_LIBS
