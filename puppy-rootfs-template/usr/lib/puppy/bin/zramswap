@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 total=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
 z1=$(($total/15))
