@@ -1,0 +1,80 @@
+#!/bin/sh
+
+total=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
+z1=$(($total/15))
+zramsize="$z1"
+
+start() {
+	
+  if [ "$(swapon --show | grep "/dev/zram")" == "" ]; then	
+  
+	  if [ ! -e /sys/block/zram0/disksize ]; then
+	   modprobe zram
+	   sleep 1
+	  fi
+	  
+	  if [ ! -e /sys/block/zram0/disksize ]; then
+	   echo "zram module is missing or not supported"
+	   exit
+	  fi
+	  
+	  echo "zram size: $zramsize"
+	  echo $(($zramsize*1024)) | bc > /sys/block/zram0/disksize
+	  mkswap /dev/zram0
+	  swapon -p 50 /dev/zram0
+	  echo "zram started"
+  
+  else
+  
+      echo "zram is already active"
+  
+  fi
+
+}
+
+stop() {
+	
+  if [ "$(swapon --show | grep "/dev/zram")" != "" ]; then	
+
+	  if [ ! -e /sys/block/zram0/disksize ]; then
+	   echo "zram module is missing or not supported"
+	   exit
+	  fi	
+		
+	  swapoff /dev/zram0
+	  echo "zram stopped"
+
+  fi
+  
+}
+
+case "$1" in
+  start)
+    if [ "$(swapon --show | grep -v "/dev/zram" | grep "/dev")" == "" ]; then
+	  start
+	else
+	  if [ -e /sys/module/zswap ]; then
+		echo 1 > /sys/module/zswap/parameters/enabled
+		echo "lz4" > /sys/module/zswap/parameters/compressor 
+		echo 15 > /sys/module/zswap/parameters/max_pool_percent
+		echo 1 > /sys/module/zswap/parameters/shrinker_enabled      
+		echo "swap partition/file detected, enabling zswap instead"
+	   else
+	    start
+      fi
+    fi
+  ;;
+
+  stop)
+    stop
+  ;;
+
+  restart)
+	stop
+    [ -e /sys/block/zram0/reset ] && echo 1 > /sys/block/zram0/reset
+	[ "$(swapon --show | grep -v "/dev/zram" | grep "/dev")" == "" ] && start
+  ;;
+
+  *)
+  echo "Usage: $0 (start|stop|restart)"
+esac
