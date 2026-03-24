@@ -47,7 +47,8 @@ make -j$(nproc)
 echo "--- Installing to /usr/local ---"
 sudo make install
 
-ln -sf /usr/local/lib/x86_64-linux-gnu/libexec/kf6/kdesu /usr/local/bin/kdesu
+ln -sf /usr/local/libexec/kf6/kdesu /usr/local/bin/kdesu
+ln -sf /usr/local/bin/kdesu /usr/local/bin/gksu
 
 echo "--- Cleanup ---"
 cd ~
