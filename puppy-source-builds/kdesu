@@ -19,7 +19,9 @@ apt install -y \
     libkf6doctools-dev \
     libkf6notifications-dev \
     libkf6pty-dev \
-    libkf6windowsystem-dev
+    libkf6windowsystem-dev \
+    libkf6kcmutils-dev\ 
+    libkf6parts-dev
 
 # Define build directory
 BUILD_DIR="/tmp/kde_build_temp"
