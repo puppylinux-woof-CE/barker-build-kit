@@ -1,0 +1,12 @@
+[Unit]
+Description=Run zram swap setup
+After=swap.target
+Wants=swap.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/puppy/bin/zramswap start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
