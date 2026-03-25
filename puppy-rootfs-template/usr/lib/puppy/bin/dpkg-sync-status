@@ -1,7 +1,9 @@
 #!/bin/bash
 
-STATUS_FILE="/var/lib/dpkg/status"
-OUT_DIR="/var/lib/dpkg/installed"
+DPKG_DIR="/var/lib/dpkg"
+
+STATUS_FILE="$DPKG_DIR/status"
+OUT_DIR="$DPKG_DIR/installed"
 
 mkdir -p "$OUT_DIR"
 
@@ -25,7 +27,11 @@ do
     [ -z "$pkg" ] && continue
 
     if grep -q "^Package: $pkg$" "$STATUS_FILE"; then
-        dpkg-query -s "$pkg" > "$OUT_DIR/$pkg"
+        if [ -f "$DPKG_DIR/info/${pkg}.list" ]; then
+           dpkg-query -s "$pkg" > "$OUT_DIR/$pkg"
+        else
+           [ -f "$OUT_DIR/$pkg" ] && rm -f "$OUT_DIR/$pkg"           
+        fi
     else
         [ -f "$OUT_DIR/$pkg" ] && rm -f "$OUT_DIR/$pkg"
     fi
