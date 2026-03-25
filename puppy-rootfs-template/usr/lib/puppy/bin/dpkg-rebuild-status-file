@@ -9,6 +9,14 @@ TMP_FILE="$(mktemp)"
     exit 1
 }
 
+find $SRC_DIR -type f -print0 | while IFS= read -r -d '' file; do
+    
+    $bname=$(basename $file)
+
+    [ ! -f /var/lib/dpkg/info/${bname}.list ] && rm -f $SRC_DIR/$bname
+
+done
+
 # Single pass over all files (no per-file grep/awk)
 awk '
 FNR==1 {
