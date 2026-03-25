@@ -27,7 +27,7 @@ do
     [ -z "$pkg" ] && continue
 
     if grep -q "^Package: $pkg$" "$STATUS_FILE"; then
-        if [ -f "$DPKG_DIR/info/${pkg}.list" ]; then
+        if [ -f "$DPKG_DIR/info/${pkg}.list" ] || ls /var/lib/dpkg/info/"${pkg}":* >/dev/null 2>&1; then
            dpkg-query -s "$pkg" > "$OUT_DIR/$pkg"
         else
            [ -f "$OUT_DIR/$pkg" ] && rm -f "$OUT_DIR/$pkg"           
