@@ -1,0 +1,1 @@
+DPkg::Post-Invoke-Success { "/usr/lib/puppy/bin/dpkg-rebuild-status-file"; };
