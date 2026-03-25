@@ -9,11 +9,17 @@ TMP_FILE="$(mktemp)"
     exit 1
 }
 
-find $SRC_DIR -type f -print0 | while IFS= read -r -d '' file; do
-    
-    $bname=$(basename $file)
+find /var/lib/dpkg/installed -type f -print0 |
+while IFS= read -r -d '' file; do
 
-    [ ! -f /var/lib/dpkg/info/${bname}.list ] && rm -f $SRC_DIR/$bname
+    bname=${file##*/}
+
+    if [ -f "/var/lib/dpkg/info/${bname}.list" ] ||
+       ls /var/lib/dpkg/info/"${bname}":* >/dev/null 2>&1; then
+        continue
+    fi
+
+    rm -f "${SRC_DIR}/$bname"
 
 done
 
