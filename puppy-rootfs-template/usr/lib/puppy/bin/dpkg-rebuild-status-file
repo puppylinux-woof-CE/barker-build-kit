@@ -1,27 +1,77 @@
 #!/bin/bash
 
-SRC_DIR="/var/lib/dpkg/installed"
-OUT_FILE="/var/lib/dpkg/status.rebuilt"
+INSTALLED_DIR="/var/lib/dpkg/installed"
+INFO_DIR="/var/lib/dpkg/info"
+STATUS_FILE="/var/lib/dpkg/status"
 TMP_FILE="$(mktemp)"
 
-[ -d "$SRC_DIR" ] || {
-    echo "Missing directory: $SRC_DIR" >&2
+[ -d "$INSTALLED_DIR" ] || {
+    echo "Missing directory: $INSTALLED_DIR" >&2
     exit 1
 }
 
-find /var/lib/dpkg/installed -type f -print0 |
+echo "Performing dpkg status split file audit..."
+
+# Preload status file into associative array (package -> version)
+declare -A status_versions
+
+current_pkg=""
+
+while IFS= read -r line
+do
+
+   case "$line" in
+        Package:\ *)
+            current_pkg="${line#Package: }"
+            ;;
+        Version:\ *)
+            if [ -n "$current_pkg" ]; then
+                status_versions["$current_pkg"]="${line#Version: }"
+                current_pkg=""
+            fi
+            ;;
+    esac
+
+done < "$STATUS_FILE"
+
+# Process installed files
+find "$INSTALLED_DIR" -type f -print0 |
 while IFS= read -r -d '' file; do
 
     bname=${file##*/}
 
-    if [ -f "/var/lib/dpkg/info/${bname}.list" ] ||
-       ls /var/lib/dpkg/info/"${bname}":* >/dev/null 2>&1; then
+    # Fast file existence check (avoid ls)
+    if [ -f "${INFO_DIR}/${bname}.list" ] || compgen -G "${INFO_DIR}/${bname}:*.list" > /dev/null; then
+
+        # Extract version using shell (avoid grep+xargs)
+        FSTATUS=""
+
+        while IFS= read -r line; do
+            case "$line" in
+                Version:\ *)
+                    FSTATUS="${line#Version: }"
+                    break
+                    ;;
+            esac
+        done < "$file"
+
+        QSTATUS="${status_versions[$bname]}"
+
+        if [ -z "$QSTATUS" ]; then
+            rm -f "$file"
+        elif [ "$FSTATUS" != "$QSTATUS" ]; then
+            dpkg-query -s "$bname" > "$file"
+        fi
+
         continue
+
     fi
 
-    rm -f "${SRC_DIR}/$bname"
+    rm -f "$file"
 
 done
+
+echo "Regenerating dpkg status file..."
 
 # Single pass over all files (no per-file grep/awk)
 awk '
@@ -45,9 +95,9 @@ FNR==1 {
 ENDFILE {
     if (valid && started) print ""
 }
-' "$SRC_DIR"/* > "$TMP_FILE"
+' "$INSTALLED_DIR"/* > "$TMP_FILE"
 
 # Atomic replace
-mv -f /var/lib/dpkg/status /var/lib/dpkg/status-old
-mv -f "$TMP_FILE" "$OUT_FILE"
-mv -f "$OUT_FILE" /var/lib/dpkg/status
+mv -f $STATUS_FILE ${STATUS_FILE}-old
+mv -f "$TMP_FILE" $STATUS_FILE
+chmod 655 $STATUS_FILE
