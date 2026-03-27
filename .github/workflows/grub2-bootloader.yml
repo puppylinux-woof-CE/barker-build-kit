@@ -14,7 +14,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config gettext \
-          grub-efi-amd64-bin grub-common sbsigntool openssl xorriso xz-utils
+          grub-efi-amd64-bin grub-common sbsigntool openssl xorriso xz-utils autopoint
 
     - name: Clone GRUB source
       run: |
