@@ -1,0 +1,135 @@
+name: Build Universal GRUB2 EFI + El Torito
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential autoconf automake bison flex libtool pkg-config gettext \
+          grub-efi-amd64-bin grub-common sbsigntool openssl xorriso xz-utils
+
+    - name: Clone GRUB source
+      run: |
+        git clone https://git.savannah.gnu.org/git/grub.git
+        cd grub
+        ./bootstrap
+        ./configure --with-platform=efi --target=x86_64 --disable-werror
+        make -j$(nproc)
+        cd ..
+
+    - name: Create early.cfg (GRUB -> Linux -> Windows -> GRUB shell)
+      run: |
+        cat > early.cfg << 'EOF'
+        # 1️⃣ Try to find a GRUB config file first
+        for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg; do
+            search --file --set=root $loc
+            if [ -f ($root)$loc ]; then
+                configfile ($root)$loc
+            fi
+        done
+
+        # 2️⃣ If no config found, try to detect Linux kernels
+        linux_found=0
+        for disk in hd0 hd1 hd2 hd3; do
+            for part in 1 2 3 4; do
+                if [ -e ($disk,$part)/boot/vmlinuz* ]; then
+                    linux_found=1
+                    set root=($disk,$part)
+                    for kern in /boot/vmlinuz*; do
+                        initrd_path=$(echo $kern | sed 's/vmlinuz/initrd.img/')
+                        menuentry "Linux ($(basename $kern))" {
+                            linux ($root)$kern root=UUID=$(blkid -s UUID -o value $(echo $root)) ro
+                            initrd ($root)$initrd_path
+                        }
+                    done
+                fi
+            done
+        done
+
+        # 3️⃣ If no Linux found, try Windows as last resort
+        if [ $linux_found -eq 0 ]; then
+            for disk in hd0 hd1 hd2 hd3; do
+                for part in 1 2 3 4; do
+                    if [ -f ($disk,$part)/EFI/Microsoft/Boot/bootmgfw.efi ]; then
+                        set root=($disk,$part)
+                        chainloader ($root)/EFI/Microsoft/Boot/bootmgfw.efi
+                    fi
+                done
+            done
+        fi
+
+        # 4️⃣ Fallback to GRUB shell if nothing is found
+        echo "No OS found. Dropping to GRUB shell..."
+        sleep 3
+        EOF
+
+    - name: Build standalone EFI binaries
+      run: |
+        # Full universal loader with embedded early.cfg
+        grub-mkstandalone \
+          -O x86_64-efi \
+          -o grubx64.efi \
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf search search_fs_file normal configfile linux chain loopback iso9660 floppy efi_gop efi_uga gfxterm all_video" \
+          "boot/grub/grub.cfg=early.cfg"
+
+        # Minimal GRUB shell (MMX)
+        grub-mkstandalone \
+          -O x86_64-efi \
+          -o mmx64.efi \
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf search search_fs_file normal linux chain loopback iso9660 floppy efi_gop efi_uga gfxterm all_video"
+
+    - name: Generate Secure Boot key (100-year validity)
+      run: |
+        openssl req -new -x509 -newkey rsa:4096 \
+          -keyout db.key -out db.crt -nodes -days 36500 \
+          -subj "/CN=GRUB Secure Boot Long Validity/"
+
+    - name: Sign EFI binaries
+      run: |
+        sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
+        sbsign --key db.key --cert db.crt --output mmx64.efi.signed mmx64.efi
+
+    - name: Package EFI binaries
+      run: |
+        mkdir -p grub2-efi-bin
+        cp grubx64.efi grubx64.efi.signed mmx64.efi mmx64.efi.signed early.cfg grub2-efi-bin/
+        # copy grubx64 as BOOTX64.EFI
+        cp grubx64.efi.signed grub2-efi-bin/BOOTX64.EFI
+        tar -cJf grub2-efi-bin.tar.xz -C grub2-efi-bin .
+
+    - name: Create El Torito FAT image
+      run: |
+        dd if=/dev/zero of=eltorito.img bs=1M count=50
+        mkfs.vfat -F 32 -n "ELTORITO" eltorito.img
+        mkdir -p mnt
+        sudo mount -o loop eltorito.img mnt
+        sudo mkdir -p mnt/EFI/BOOT
+        sudo cp grubx64.efi.signed mnt/EFI/BOOT/BOOTX64.EFI
+        sudo cp mmx64.efi.signed mnt/EFI/BOOT/MMX64.EFI
+        sudo mkdir -p mnt/EFI/BOOT/grub
+        sudo cp early.cfg mnt/EFI/BOOT/grub/
+        sudo umount mnt
+
+    - name: Package El Torito image
+      run: |
+        tar -cJf grub2-iso.tar.xz eltorito.img
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: grub2-efi-bin
+        path: grub2-efi-bin.tar.xz
+
+    - name: Upload El Torito artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: grub2-iso
+        path: grub2-iso.tar.xz
