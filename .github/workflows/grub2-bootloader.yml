@@ -74,6 +74,9 @@ jobs:
 
     - name: Build standalone EFI binaries
       run: |
+
+        export GRUBDIR=grub/install/usr/lib/grub/x86_64-efi
+      
         # Full universal loader with embedded early.cfg
         grub-mkstandalone \
           -O x86_64-efi \
