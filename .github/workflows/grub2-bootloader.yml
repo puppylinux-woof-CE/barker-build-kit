@@ -74,24 +74,25 @@ jobs:
 
     - name: Build standalone EFI binaries
       run: |
-
-        export GRUBDIR=grub/install/usr/lib/grub/x86_64-efi
-      
-        # Full universal loader with embedded early.cfg
-        grub-mkstandalone \
+        GRUB_PREFIX=grub/grub-install
+        GRUB_MODULES=$GRUB_PREFIX/lib/grub/x86_64-efi
+        GRUB_TOOLS=$GRUB_PREFIX/bin
+    
+        echo "Using modules: $GRUB_MODULES"
+    
+        $GRUB_TOOLS/grub-mkstandalone \
           -O x86_64-efi \
+          --directory="$GRUB_MODULES" \
           -o grubx64.efi \
-           --directory=$GRUBDIR \ 
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf search search_fs_file normal configfile linux chain loopback iso9660 floppy efi_gop efi_uga gfxterm all_video" \
           "boot/grub/grub.cfg=early.cfg"
-
-        # Minimal GRUB shell (MMX)
-        grub-mkstandalone \
+    
+        $GRUB_TOOLS/grub-mkstandalone \
           -O x86_64-efi \
+          --directory="$GRUB_MODULES" \
           -o mmx64.efi \
-          --directory=$GRUBDIR \
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf search search_fs_file normal linux chain loopback iso9660 floppy efi_gop efi_uga gfxterm all_video"
-
+   
     - name: Generate Secure Boot key (100-year validity)
       run: |
         openssl req -new -x509 -newkey rsa:4096 \
