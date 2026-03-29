@@ -22,16 +22,18 @@ jobs:
         git clone https://git.savannah.gnu.org/git/grub.git
         cd grub
 
+        mkdir -p mkdir -p $(pwd)/grub-install
+
         ./bootstrap
 
         ./configure \
           --with-platform=efi \
           --target=x86_64 \
-          --prefix=$PWD/grub-install \
+          --prefix=$(pwd)/grub-install \
           --disable-werror
 
         make -j$(nproc)
-        make install
+        make install DESTDIR=$(pwd)/grub-install
 
     - name: Create advanced early.cfg (NVMe + ISO + Linux + Windows)
       run: |
