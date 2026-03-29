@@ -119,6 +119,8 @@ jobs:
         MODDIR=$PREFIX/lib/grub/x86_64-efi
         BINDIR=$PREFIX/bin
 
+        mkdir -p $(pwd)/$PREFIX
+
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
           --directory=$MODDIR \
