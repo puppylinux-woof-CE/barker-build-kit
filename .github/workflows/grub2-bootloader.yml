@@ -29,11 +29,11 @@ jobs:
         ./configure \
           --with-platform=efi \
           --target=x86_64 \
-          --prefix=$(pwd)/grub-install \
+          --prefix=$(pwd)/grub-staging \
           --disable-werror
 
         make -j$(nproc)
-        make install DESTDIR=$(pwd)/grub-install
+        make install DESTDIR=$(pwd)/grub-staging
 
     - name: Create advanced early.cfg (NVMe + ISO + Linux + Windows)
       run: |
@@ -117,7 +117,7 @@ jobs:
 
     - name: Build EFI binaries
       run: |
-        PREFIX=grub/grub-install
+        PREFIX=grub/grub-staging
         MODDIR=$PREFIX/lib/grub/x86_64-efi
         BINDIR=$PREFIX/bin
 
