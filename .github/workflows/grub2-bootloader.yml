@@ -20,14 +20,13 @@ jobs:
         git clone --depth 1 https://git.savannah.gnu.org/git/grub.git
         cd grub
         ./bootstrap
-        # We use prefix / to make DESTDIR packaging cleaner
         ./configure \
           --with-platform=efi \
           --target=x86_64 \
           --prefix=/ \
           --disable-werror
         make -j$(nproc)
-        # Install into a local folder named 'output'
+        # Install to a local subdirectory to avoid permission/system issues
         make install DESTDIR=$(pwd)/output
 
     - name: Create advanced early.cfg
@@ -48,7 +47,6 @@ jobs:
 
     - name: Build EFI binaries
       run: |
-        # Define paths based on the 'output' folder from the build step
         GRUB_ROOT=$(pwd)/grub/output
         MODDIR=$GRUB_ROOT/lib/grub/x86_64-efi
         BINDIR=$GRUB_ROOT/bin
@@ -72,51 +70,60 @@ jobs:
         strip --strip-unneeded mmx64.efi || true
         find grub/output/lib/grub/x86_64-efi -name "*.mod" -exec strip --strip-unneeded {} \; || true
 
-    - name: Generate Secure Boot key (100 years)
+    - name: Generate Secure Boot keys and Certificate
       run: |
+        # Generate private key and PEM cert
         openssl req -new -x509 -newkey rsa:4096 \
           -keyout db.key -out db.crt -nodes -days 36500 \
           -subj "/CN=GRUB Secure Boot 100Y/"
+        
+        # Convert PEM to DER (.cer) for UEFI enrollment
+        openssl x509 -in db.crt -outform DER -out puppy.cer
 
     - name: Sign EFI
       run: |
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
         sbsign --key db.key --cert db.crt --output mmx64.efi.signed mmx64.efi
 
-    - name: Prepare ESP layout
+    - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
         mkdir -p esp/EFI/BOOT/grub/fonts
         mkdir -p esp/EFI/BOOT/grub/x86_64-efi
+        mkdir -p esp/keys
+        
+        # Copy Binaries
         cp grubx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
         cp mmx64.efi.signed esp/EFI/BOOT/MMX64.EFI
         cp early.cfg esp/EFI/BOOT/grub/grub.cfg
-        cp grub/output/lib/grub/x86_64-efi/* esp/EFI/BOOT/grub/x86_64-efi/
+        
+        # Copy Certificate for easy access
+        cp puppy.cer esp/keys/puppy-enroll-me.cer
+        
+        # Copy Modules and Fonts
+        cp -r grub/output/lib/grub/x86_64-efi/*.mod esp/EFI/BOOT/grub/x86_64-efi/
+        cp -r grub/output/lib/grub/x86_64-efi/*.lst esp/EFI/BOOT/grub/x86_64-efi/
         cp grub/output/share/grub/*.pf2 esp/EFI/BOOT/grub/fonts/ || true
 
     - name: Package ESP tarball
-      run: tar -cJf grub-efi-files.tar.xz -C esp .
+      run: tar -cJf grub-efi-ultimate-pack.tar.xz -C esp .
 
     - name: Create El Torito image
       run: |
-        dd if=/dev/zero of=eltorito.img bs=1M count=50
+        dd if=/dev/zero of=eltorito.img bs=1M count=60
         mkfs.vfat -F32 eltorito.img
         mmd -i eltorito.img ::/EFI ::/EFI/BOOT
         mcopy -i eltorito.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
         mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
 
     - name: Package ISO assets
-      run: tar -cJf grub2-iso.tar.xz eltorito.img
-
-    - name: Package EFI bin
-      run: |
-        cp grubx64.efi.signed BOOTX64.EFI
-        tar -cJf grub2-efi-bin.tar.xz grubx64.efi* mmx64.efi* BOOTX64.EFI early.cfg
+      run: tar -cJf grub2-iso-image.tar.xz eltorito.img
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: grub-build
+        name: grub-ultimate-build
         path: |
-          grub-efi-files.tar.xz
-          grub2-efi-bin.tar.xz
-          grub2-iso.tar.xz
+          grub-efi-ultimate-pack.tar.xz
+          grub2-iso-image.tar.xz
+          puppy.cer
+          puppy.key
