@@ -74,8 +74,8 @@ jobs:
       run: |
         # Generate private key and PEM cert
         openssl req -new -x509 -newkey rsa:4096 \
-          -keyout db.key -out db.crt -nodes -days 36500 \
-          -subj "/CN=GRUB Secure Boot 100Y/"
+          -keyout db.key -out db.crt -nodes -days 18250 \
+          -subj "/CN=Puppy Linux Secure Boot Certificate/"
         
         # Convert PEM to DER (.cer) for UEFI enrollment
         openssl x509 -in db.crt -outform DER -out puppy.cer
