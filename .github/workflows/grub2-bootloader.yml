@@ -1,7 +1,6 @@
 name: Build GRUB2 Ultimate EFI Package
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   build:
