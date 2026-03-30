@@ -2,8 +2,6 @@ name: Build Refind Secure Boot Bundle (precompiled shim + MOK + GRUB + WinPE)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
 
 jobs:
   build:
