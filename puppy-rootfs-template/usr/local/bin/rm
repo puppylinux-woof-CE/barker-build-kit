@@ -1,13 +1,72 @@
 #!/bin/bash
-#blocks dangerous command
+#blocks dangerous rm arguments
 
-for arg in "$@"
-do
-    if [ "$arg" == "/" ] || [ "$arg" == "/*" ]; then
-        echo "Blocked dangerous rm usage"
-        exit 1
-    fi
+DANGER_FOUND=0
+
+normalize_path() {
+    # collapse multiple slashes
+    echo "$1" | sed -E 's:/+:/:g'
+}
+
+resolve_path() {
+    # canonicalize even if path does not exist
+    realpath -m -- "$1" 2>/dev/null
+}
+
+for arg in "$@"; do
+
+    # skip options (rm flags)
+    case "$arg" in
+        -*) continue ;;
+    esac
+
+    norm="$(normalize_path "$arg")"
+    resolved="$(resolve_path "$norm")"
+
+    # fallback if realpath fails
+    [ -z "$resolved" ] && resolved="$norm"
+
+    case "$resolved" in
+        /|/[*])
+            DANGER_FOUND=1
+            ;;
+        /mnt|/mnt/[*])
+            DANGER_FOUND=1
+            ;;
+        /media|/media/[*])
+            DANGER_FOUND=1
+            ;;
+        /run/media|/run/media/[*])
+            DANGER_FOUND=1
+            ;;
+        /initrd|/initrd/[*])
+            DANGER_FOUND=1
+            ;;
+        /run/initramfs|/run/initramfs/[*])
+            DANGER_FOUND=1
+            ;;
+        /run/user/[0-9]*/gvfs|/run/user/[0-9]*/gvfs/[*])
+            DANGER_FOUND=1
+            ;;
+    esac
+
+    [ "$DANGER_FOUND" -ne 0 ] && break
+    
 done
 
-[ -f /usr/bin/rm ] && exec /usr/bin/rm "$@"
-[ -f /bin/rm ] && exec /bin/rm "$@"
+if [ "$DANGER_FOUND" -ne 0 ]; then
+    echo "dangerous rm usage blocked"
+    exit 1
+fi
+
+# execute real rm
+if [ -x /usr/bin/rm ]; then
+    exec /usr/bin/rm "$@"
+elif [ -x /bin/rm ]; then
+    exec /bin/rm "$@"
+elif [ -x /bin/busybox ]; then
+    exec /bin/busybox rm "$@"
+else
+    echo "rm not found"
+    exit 1
+fi
