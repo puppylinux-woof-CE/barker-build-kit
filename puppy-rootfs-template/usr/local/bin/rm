@@ -1,5 +1,4 @@
 #!/bin/bash
-#blocks dangerous rm arguments
 
 DANGER_FOUND=0
 
@@ -42,9 +41,15 @@ for arg in "$@"; do
         /initrd|/initrd/[*])
             DANGER_FOUND=1
             ;;
+        /initrd/mnt|/initrd/mnt/[*])
+            DANGER_FOUND=1
+            ;;            
         /run/initramfs|/run/initramfs/[*])
             DANGER_FOUND=1
             ;;
+        /run/initramfs/mnt|/run/initramfs/mnt/[*])
+            DANGER_FOUND=1
+            ;;            
         /run/user/[0-9]*/gvfs|/run/user/[0-9]*/gvfs/[*])
             DANGER_FOUND=1
             ;;
