@@ -32,7 +32,7 @@ jobs:
       run: |
         cat > early.cfg << 'EOF'
         # Scan for existing configs
-        for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg; do
+        for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg /boot/efi/grub2/grub.cfg; do
             search --file --set=root $loc
             if [ -f ($root)$loc ]; then
                 configfile ($root)$loc
@@ -54,14 +54,14 @@ jobs:
           -O x86_64-efi \
           --directory=$MODDIR \
           -o grubx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search loopback chain linux reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi" \
           "boot/grub/grub.cfg=early.cfg"
 
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
           --directory=$MODDIR \
           -o mmx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal search search_fs_file linux chain loopback iso9660 efi_gop gfxterm all_video"
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search loopback chain linux reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi"
 
     - name: Strip EFI binaries and modules
       run: |
@@ -112,7 +112,7 @@ jobs:
         mkfs.vfat -F32 eltorito.img
         mmd -i eltorito.img ::/EFI ::/EFI/BOOT
         mcopy -i eltorito.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
-        mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
+        #mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
 
     - name: Package ISO assets
       run: tar -cJf grub2-iso-image.tar.xz eltorito.img
