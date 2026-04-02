@@ -32,7 +32,7 @@ jobs:
       run: |
         cat > early.cfg << 'EOF'
         # Scan for existing configs
-        for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg; do
+        for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg /boot/efi/grub2/grub.cfg; do
             search --file --set=root $loc
             if [ -f ($root)$loc ]; then
                 configfile ($root)$loc
