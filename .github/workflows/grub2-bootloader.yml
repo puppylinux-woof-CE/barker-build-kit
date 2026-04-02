@@ -54,14 +54,14 @@ jobs:
           -O x86_64-efi \
           --directory=$MODDIR \
           -o grubx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid search_label loopback chain linux halt reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi" \
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search loopback chain linux reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi" \
           "boot/grub/grub.cfg=early.cfg"
 
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
           --directory=$MODDIR \
           -o mmx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid search_label loopback chain linux halt reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi"
+          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search loopback chain linux reboot all_video video video_fb efi_gop gfxterm font ahci ehci usb usbms scsi"
 
     - name: Strip EFI binaries and modules
       run: |
