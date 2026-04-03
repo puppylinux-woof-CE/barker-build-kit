@@ -52,9 +52,9 @@ jobs:
         BINDIR=$GRUB_ROOT/bin
 
         cat > sbat.csv << 'EOF'
-        sbat,5,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
-        grub,5,GRUB,grub,2.15,https://www.gnu.org/software/grub/
-        puppy,5,Puppy Linux,puppy,26.01,https://puppylinux.com/
+        sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
+        grub,8,GRUB,grub,2.15,https://www.gnu.org/software/grub/
+        puppy,8,Puppy Linux,puppy,26.01,https://puppylinux.com/
         EOF
         
         $BINDIR/grub-mkstandalone \
@@ -70,12 +70,7 @@ jobs:
       run: |
             git clone --recursive --depth 1 https://github.com/rhboot/shim.git
             cd shim
-            
-            cat > sbat.csv << 'EOF'
-            sbat,5,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md
-            shim,5,Mok Manager,shim,16.1,https://github.com/rhboot/shim
-            EOF
-            
+        
             # We define DEFAULT_LOADER to tell shim to look for grubx64.efi
             make DEFAULT_LOADER=\\\\grubx64.efi 
             cp mmx64.efi ../mmx64.efi     
@@ -126,15 +121,12 @@ jobs:
 
     - name: Create El Torito image
       run: |
-        dd if=/dev/zero of=eltorito.img bs=1M count=8
+        dd if=/dev/zero of=efi.img bs=1M count=8
         mkfs.vfat -F32 efi.img
         mmd -i efi.img ::/EFI ::/EFI/BOOT
         mcopy -i efi.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
-        #mcopy -i efi.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
-
-    - name: Package ISO assets
-      run: tar -cJf grub2-iso-image.tar.xz eltorito.img
-
+        mcopy -i efi.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
+        
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
