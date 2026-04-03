@@ -12,7 +12,8 @@ jobs:
         sudo apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
-          sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev
+          sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
+          libnss3-dev gnu-efi unifont
 
     - name: Build GRUB from source
       run: |
@@ -58,18 +59,20 @@ jobs:
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
           "boot/grub/grub.cfg=early.cfg"
 
-        $BINDIR/grub-mkstandalone \
-          -O x86_64-efi \
-          -C xz \
-          --directory=$MODDIR \
-          -o mmx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal search search_fs_file linux chain loopback iso9660 efi_gop gfxterm all_video"
-
     - name: Strip EFI binaries and modules
       run: |
         strip --strip-unneeded grubx64.efi || true
         strip --strip-unneeded mmx64.efi || true
         find grub/output/lib/grub/x86_64-efi -name "*.mod" -exec strip --strip-unneeded {} \; || true
+
+    - name: Build rhboot/shim and MOKManager
+      run: |
+            git clone --recursive --depth 1 https://github.com/rhboot/shim.git
+            cd shim
+            # We define DEFAULT_LOADER to tell shim to look for grubx64.efi
+            make DEFAULT_LOADER=\\\\grubx64.efi
+            cp shimx64.efi ../shimx64.efi
+            cp MokManager.efi ../mmx64.efi        
 
     - name: Generate Secure Boot keys and Certificate
       run: |
@@ -84,10 +87,10 @@ jobs:
     - name: Sign EFI
       run: |
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
-        sbsign --key db.key --cert db.crt --output mmx64.efi.signed mmx64.efi
 
     - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
+      
         mkdir -p esp/EFI/BOOT/grub/fonts
         mkdir -p esp/EFI/BOOT/grub/x86_64-efi
         mkdir -p esp/keys
@@ -95,6 +98,7 @@ jobs:
         # Copy Binaries
         cp grubx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
         cp mmx64.efi.signed esp/EFI/BOOT/MMX64.EFI
+        cp shimx64.efi.signed esp/EFI/BOOT/SHIMX64.EFI
         cp early.cfg esp/EFI/BOOT/grub/grub.cfg
         
         # Copy Certificate for easy access
@@ -110,8 +114,8 @@ jobs:
 
     - name: Create El Torito image
       run: |
-        dd if=/dev/zero of=eltorito.img bs=1M count=60
-        mkfs.vfat -F32 eltorito.img
+        dd if=/dev/zero of=eltorito.img bs=1M count=8
+        mkfs.vfat -F32 efi.img
         mmd -i eltorito.img ::/EFI ::/EFI/BOOT
         mcopy -i eltorito.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
         #mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
