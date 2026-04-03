@@ -64,7 +64,7 @@ jobs:
         
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
-          -C xz \
+          --compression=xz \
           --sbat sbat.csv \
           --directory=$MODDIR \
           -o grubx64.efi \
