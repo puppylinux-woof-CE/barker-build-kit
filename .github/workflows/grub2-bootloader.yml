@@ -12,7 +12,7 @@ jobs:
         sudo apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
-          sbsigntool openssl xorriso xz-utils mtools dosfstools
+          sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev
 
     - name: Build GRUB from source
       run: |
