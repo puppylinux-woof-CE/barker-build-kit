@@ -56,6 +56,11 @@ jobs:
         grub,8,GRUB,grub,2.15,https://www.gnu.org/software/grub/
         puppy,8,Puppy Linux,puppy,26.01,https://puppylinux.com/
         EOF
+
+        cat > bootx64.csv << 'EOF'
+        shimx64.efi,puppy,,This is the boot entry for puppy
+        EOF
+
         
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
@@ -75,13 +80,13 @@ jobs:
             make DEFAULT_LOADER=\\\\grubx64.efi 
             cp mmx64.efi ../mmx64.efi
             cp shimx64.efi ../shimx64.efi
+            cp fbx64.efi ../fbx64.efi
 
     - name: Strip EFI binaries and modules
       run: |
-        strip --strip-unneeded grubx64.efi || true
-        strip --strip-unneeded mmx64.efi || true
-        strip --strip-unneeded shimx64.efi || true
-        find grub/output/lib/grub/x86_64-efi -name "*.mod" -exec strip --strip-unneeded {} \; || true
+
+        find . -type f -name "*.efi" | xargs -i strip --strip-unneeded '{}'        
+        find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i strip --strip-unneeded '{}'
 
     - name: Generate Secure Boot keys and Certificate
       run: |
@@ -95,9 +100,11 @@ jobs:
 
     - name: Sign EFI
       run: |
-        sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
-        sbsign --key db.key --cert db.crt --output mmx64.efi.signed mmx64.efi
-        sbsign --key db.key --cert db.crt --output shimx64.efi.signed shimx64.efi
+
+        for efi_file in grubx64.efi mmx64.efi shimx64.efi fbx64.efi
+        do
+          sbsign --key db.key --cert db.crt --output $efi_file.signed $efi_file
+        done
         
     - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
@@ -107,9 +114,14 @@ jobs:
         mkdir -p esp/keys
         
         # Copy Binaries
-        cp grubx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
+        cp grubx64.efi.signed esp/EFI/BOOT/GRUBX64.EFI
         cp mmx64.efi.signed esp/EFI/BOOT/MMX64.EFI
+        cp fbx64.efi.signed esp/EFI/BOOT/FBX64.EFI
+        cp shimx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
         cp shimx64.efi.signed esp/EFI/BOOT/SHIMX64.EFI
+
+        cp bootx64.csv esp/EFI/BOOT/BOOTX64.CSV
+        
         #cp early.cfg esp/EFI/BOOT/grub/grub.cfg
         
         # Copy Certificate for easy access
@@ -128,9 +140,13 @@ jobs:
         dd if=/dev/zero of=efi.img bs=1M count=7
         mkfs.vfat -F32 efi.img
         mmd -i efi.img ::/EFI ::/EFI/BOOT
-        mcopy -i efi.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
+        
+        mcopy -i efi.img grubx64.efi.signed ::/EFI/BOOT/GRUBX64.EFI
         mcopy -i efi.img mmx64.efi ::/EFI/BOOT/MMX64.EFI
+        mcopy -i efi.img shimx64.efi ::/EFI/BOOT/BOOTX64.EFI
         mcopy -i efi.img shimx64.efi ::/EFI/BOOT/SHIMX64.EFI
+        mcopy -i efi.img fbx64.efi ::/EFI/BOOT/FBX64.EFI
+        mcopy -i efi.img bootx64.csv ::/EFI/BOOT/BOOTX64.CSV
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -140,4 +156,3 @@ jobs:
           grub-efi-ultimate-pack.tar.xz
           efi.img
           puppy.cer
-          puppy.key
