@@ -73,11 +73,13 @@ jobs:
 
     - name: Build rhboot/shim and MOKManager
       run: |
+      
             git clone --recursive --depth 1 https://github.com/rhboot/shim.git
             cd shim
         
             # We define DEFAULT_LOADER to tell shim to look for grubx64.efi
-            make DEFAULT_LOADER=\\\\grubx64.efi 
+            make DEFAULT_LOADER=\\\\grubx64.efi
+            
             cp mmx64.efi ../mmx64.efi
             cp shimx64.efi ../shimx64.efi
             cp fbx64.efi ../fbx64.efi
@@ -103,7 +105,7 @@ jobs:
 
         for efi_file in grubx64.efi mmx64.efi shimx64.efi fbx64.efi
         do
-          sbsign --key db.key --cert db.crt --output $efi_file.signed $efi_file
+          sbsign --key db.key --cert db.crt --output ${efi_file}.signed $efi_file
         done
         
     - name: Prepare ESP layout (Modules + Fonts + Cert)
@@ -114,16 +116,17 @@ jobs:
         mkdir -p esp/keys
         
         # Copy Binaries
-        cp grubx64.efi.signed esp/EFI/BOOT/GRUBX64.EFI
-        cp mmx64.efi.signed esp/EFI/BOOT/MMX64.EFI
-        cp fbx64.efi.signed esp/EFI/BOOT/FBX64.EFI
+
+        for efi_file in grubx64.efi mmx64.efi fbx64.efi shimx64.efi
+        do
+          cp ${efi_file}.signed esp/EFI/BOOT/${efi_file}
+        done
+
+        #default boot
         cp shimx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
-        cp shimx64.efi.signed esp/EFI/BOOT/SHIMX64.EFI
 
         cp bootx64.csv esp/EFI/BOOT/BOOTX64.CSV
-        
-        #cp early.cfg esp/EFI/BOOT/grub/grub.cfg
-        
+                
         # Copy Certificate for easy access
         cp puppy.cer esp/keys/puppy-enroll-me.cer
         
@@ -133,26 +136,30 @@ jobs:
         cp grub/output/share/grub/*.pf2 esp/EFI/BOOT/grub/fonts/ || true
 
     - name: Package ESP tarball
-      run: tar -cJf grub-efi-ultimate-pack.tar.xz -C esp .
+      run: tar -cJf puppy-grub-efi-pack.tar.xz -C esp .
 
     - name: Create El Torito image
       run: |
         dd if=/dev/zero of=efi.img bs=1M count=8
         mkfs.vfat -F32 efi.img
         mmd -i efi.img ::/EFI ::/EFI/BOOT
+
         
-        mcopy -i efi.img grubx64.efi.signed ::/EFI/BOOT/GRUBX64.EFI
-        mcopy -i efi.img mmx64.efi ::/EFI/BOOT/MMX64.EFI
+        for efi_file in grubx64.efi mmx64.efi fbx64.efi shimx64.efi
+        do
+          mcopy -i efi.img ${efi_file}.signed ::/EFI/BOOT/${efi_file}
+        done
+
+        #default boot
         mcopy -i efi.img shimx64.efi ::/EFI/BOOT/BOOTX64.EFI
-        mcopy -i efi.img shimx64.efi ::/EFI/BOOT/SHIMX64.EFI
-        mcopy -i efi.img fbx64.efi ::/EFI/BOOT/FBX64.EFI
-        mcopy -i efi.img bootx64.csv ::/EFI/BOOT/BOOTX64.CSV
         
+        mcopy -i efi.img bootx64.csv ::/EFI/BOOT/BOOTX64.CSV
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: grub-ultimate-build
+        name: puppy-grub-build
         path: |
-          grub-efi-ultimate-pack.tar.xz
+          puppy-grub-efi-pack.tar.xz
           efi.img
           puppy.cer
