@@ -151,7 +151,7 @@ jobs:
         done
 
         #default boot
-        mcopy -i efi.img shimx64.efi ::/EFI/BOOT/BOOTX64.EFI
+        mcopy -i efi.img shimx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
         
         mcopy -i efi.img bootx64.csv ::/EFI/BOOT/BOOTX64.CSV
 
