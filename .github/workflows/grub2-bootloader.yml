@@ -1,4 +1,4 @@
-name: Build GRUB2 Ultimate EFI Package
+name: Build GRUB2 EFI Package for Puppy
 on:
   workflow_dispatch:
 
