@@ -112,7 +112,7 @@ jobs:
         mkfs.vfat -F32 eltorito.img
         mmd -i eltorito.img ::/EFI ::/EFI/BOOT
         mcopy -i eltorito.img grubx64.efi.signed ::/EFI/BOOT/BOOTX64.EFI
-        mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
+        #mcopy -i eltorito.img mmx64.efi.signed ::/EFI/BOOT/MMX64.EFI
 
     - name: Package ISO assets
       run: tar -cJf grub2-iso-image.tar.xz eltorito.img
