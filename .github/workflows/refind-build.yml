@@ -24,7 +24,7 @@ jobs:
 
       - name: Build BaseTools
         run: |
-          cd edk2
+          cd edk2        
           make -C BaseTools
 
       - name: Setup EDK2 environment
@@ -50,6 +50,12 @@ jobs:
         run: |
           cd edk2
           source edksetup.sh
+
+          # Ensure Conf is initialized
+          if [ ! -f Conf/tools_def.txt ]; then
+            cp -r Conf/.template/* Conf/
+          fi
+          
           build -a X64 -t GCC5 -p ../RefindPkg/RefindPkg.dsc
 
       - name: Collect artifacts
