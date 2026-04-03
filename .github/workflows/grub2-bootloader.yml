@@ -59,20 +59,19 @@ jobs:
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
           "boot/grub/grub.cfg=early.cfg"
 
-    - name: Strip EFI binaries and modules
-      run: |
-        strip --strip-unneeded grubx64.efi || true
-        strip --strip-unneeded mmx64.efi || true
-        find grub/output/lib/grub/x86_64-efi -name "*.mod" -exec strip --strip-unneeded {} \; || true
-
     - name: Build rhboot/shim and MOKManager
       run: |
             git clone --recursive --depth 1 https://github.com/rhboot/shim.git
             cd shim
             # We define DEFAULT_LOADER to tell shim to look for grubx64.efi
-            make DEFAULT_LOADER=\\\\grubx64.efi
-            cp shimx64.efi ../shimx64.efi
-            cp MokManager.efi ../mmx64.efi        
+            make DEFAULT_LOADER=\\\\grubx64.efi 
+            cp mmx64.efi ../mmx64.efi     
+
+    - name: Strip EFI binaries and modules
+      run: |
+        strip --strip-unneeded grubx64.efi || true
+        strip --strip-unneeded mmx64.efi || true
+        find grub/output/lib/grub/x86_64-efi -name "*.mod" -exec strip --strip-unneeded {} \; || true
 
     - name: Generate Secure Boot keys and Certificate
       run: |
@@ -87,7 +86,8 @@ jobs:
     - name: Sign EFI
       run: |
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
-
+        sbsign --key db.key --cert db.crt --output mmx64.efi.signed mmx64.efi
+        
     - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
       
