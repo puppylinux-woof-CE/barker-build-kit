@@ -137,33 +137,6 @@ jobs:
 
     - name: Package ESP tarball
       run: tar -cJf puppy-grub-efi-pack.tar.xz -C esp .
-
-    - name: Create El Torito image
-      run: |
-
-        FILESIZE=`expr 1024 \* 8` 
-      
-        dd if=/dev/zero of=efi.img bs=1k count=$FILESIZE
-        mkfs.vfat efi.img
-
-        MNTPT=$(pwd)/efimnt
-
-        mkdir -p $MNTPT
-        mount -t vfat ./efi.img $MNTPT
-        mkdir -p $MNTPT/EFI/BOOT
-        
-        for efi_file in grubx64.efi mmx64.efi fbx64.efi shimx64.efi
-        do
-          cp -f ${efi_file}.signed $MNTPT/EFI/BOOT/${efi_file}
-        done
-
-        #default boot
-        cp -f shimx64.efi.signed $MNTPT/EFI/BOOT/bootx64.efi
-
-        cp -f bootx64.csv $MNTPT/EFI/BOOT/bootx64.csv
-
-        sync
-        umount $MNTPT
       
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -171,5 +144,4 @@ jobs:
         name: puppy-grub-build
         path: |
           puppy-grub-efi-pack.tar.xz
-          efi.img
           puppy.cer
