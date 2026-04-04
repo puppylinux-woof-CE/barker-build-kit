@@ -19,7 +19,7 @@ EFI_IMG_FOUND=""
 for uf in efiboot.img efi.img boot/efiboot.img boot/efi.img
 do
 
-	if [ -f $WKBASE/puppy-livecd-build/$uf ]; then
+	if [ -f ${WKGBASE}/puppy-livecd-build/$uf ]; then
 		EFI_BOOT_IMG="$uf"
 		EFI_IMG_FOUND="true"
 		break
@@ -63,6 +63,7 @@ ROOT PASSWORD: $ROOT_PASSWORD
 
 
 if [ "$EFI_IMG_FOUND" != "" ]; then
+    echo "Building Hybrid UEFI LIVE CD..."
 	mkisofs -J -D -R ${VOLI} -o ${WKGBASE}/${ISONAME} ${BOOTPARM} ${BOOTCAT} -full-iso9660-filenames -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -eltorito-platform 0xEF -eltorito-boot ${EFI_BOOT_IMG} -no-emul-boot ${WKGBASE}/puppy-livecd-build/
 else
 	mkisofs -J -D -R ${VOLI} -o ${WKGBASE}/${ISONAME} ${BOOTPARM} ${BOOTCAT} -full-iso9660-filenames -no-emul-boot -boot-load-size 4 -boot-info-table ${WKGBASE}/puppy-livecd-build/  
