@@ -24,45 +24,68 @@ for arg in "$@"; do
 
     # fallback if realpath fails
     [ -z "$resolved" ] && resolved="$norm"
+    
+    depth=$(echo "$resolved" | grep -o "/" | wc -l)
 
     case "$resolved" in
-        /|/[*])
+        /)
+            [ $depth -eq 1 ] && DANGER_FOUND=1
+        ;;
+        /dev|/sys|/proc|/mnt|/media|/run/media|/initrd|/run/initramfs|/initrd/mnt|/run/initramfs/mnt|/run/user/[0-9]*/gvfs)
             DANGER_FOUND=1
-            ;;
-        /mnt|/mnt/[*])
-            DANGER_FOUND=1
-            ;;
-        /media|/media/[*])
-            DANGER_FOUND=1
-            ;;
-        /run/media|/run/media/[*])
-            DANGER_FOUND=1
-            ;;
-        /initrd|/initrd/[*])
-            DANGER_FOUND=1
-            ;;
-        /initrd/mnt|/initrd/mnt/[*])
-            DANGER_FOUND=1
-            ;;            
-        /run/initramfs|/run/initramfs/[*])
-            DANGER_FOUND=1
-            ;;
-        /run/initramfs/mnt|/run/initramfs/mnt/[*])
-            DANGER_FOUND=1
-            ;;            
-        /run/user/[0-9]*/gvfs|/run/user/[0-9]*/gvfs/[*])
-            DANGER_FOUND=1
-            ;;
+        ;;
+        /mnt/*)
+            if [ $depth -eq 2 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
+        /media/*)
+            if [ $depth -eq 2 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
+        /run/media/*)
+            if [ $depth -eq 3 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
+        /initrd/*)
+            if [ $depth -eq 2 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
+        /initrd/mnt/*)
+            if [ $depth -eq 3 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;            
+        /run/initramfs/*)
+            if [ $depth -eq 3 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
+        /run/initramfs/mnt/*)
+            if [ $depth -eq 4 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;            
+        /run/user/[0-9]*/gvfs/*)
+            if [ $depth -eq 5 ]; then
+               [ "$(mount | awk '{ print $3 '} | grep -m 1 $resolved)" != "" ] && DANGER_FOUND=1
+            fi
+        ;;
     esac
 
     [ "$DANGER_FOUND" -ne 0 ] && break
     
 done
 
+
 if [ "$DANGER_FOUND" -ne 0 ]; then
     echo "dangerous rm usage blocked"
     exit 1
 fi
+
 
 # execute real rm
 if [ -x /usr/bin/rm ]; then
