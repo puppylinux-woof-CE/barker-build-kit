@@ -141,7 +141,7 @@ jobs:
     - name: Create El Torito image
       run: |
         dd if=/dev/zero of=efi.img bs=1M count=8
-        mkfs.vfat -F16 efi.img
+        mkfs.vfat -F12 efi.img
         mmd -i efi.img ::/EFI ::/EFI/BOOT
 
         
