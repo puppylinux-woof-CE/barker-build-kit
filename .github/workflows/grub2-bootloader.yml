@@ -140,11 +140,14 @@ jobs:
 
     - name: Create El Torito image
       run: |
-        dd if=/dev/zero of=efi.img bs=1M count=8
-        mkfs.vfat -F12 efi.img
+
+        FILESIZE=`expr 1024 \* 8` 
+      
+        dd if=/dev/zero of=efi.img bs=1k count=$FILESIZE
+        mkfs.vfat efi.img
+        
         mmd -i efi.img ::/EFI ::/EFI/BOOT
 
-        
         for efi_file in grubx64.efi mmx64.efi fbx64.efi shimx64.efi
         do
           mcopy -i efi.img ${efi_file}.signed ::/EFI/BOOT/${efi_file}
