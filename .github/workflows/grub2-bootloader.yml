@@ -87,10 +87,10 @@ jobs:
         find . -type f -name "*.efi" | xargs -i strip --strip-unneeded '{}'        
         find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i strip --strip-unneeded '{}'
 
-    - name: Sign EFI
+    - name: Sign Grub EFI
       run: |
 
-        sbsign --key db.key --cert db.crt --output grubx64.signed $efi_file
+        sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
 
     - name: Download prebuilt Microsoft-signed shim
       run: |
