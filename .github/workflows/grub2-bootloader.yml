@@ -15,6 +15,16 @@ jobs:
           sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
           libnss3-dev gnu-efi unifont
 
+    - name: Generate Secure Boot keys and Certificate
+      run: |
+        # Generate private key and PEM cert
+        openssl req -new -x509 -newkey rsa:4096 \
+          -keyout db.key -out db.crt -nodes -days 18250 \
+          -subj "/CN=Puppy Linux Secure Boot Certificate/"
+        
+        # Convert PEM to DER (.cer) for UEFI enrollment
+        openssl x509 -in db.crt -outform DER -out puppy.cer
+
     - name: Build GRUB from source
       run: |
         git clone --depth 1 https://git.savannah.gnu.org/git/grub.git
@@ -71,18 +81,26 @@ jobs:
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
           "boot/grub/grub.cfg=early.cfg" "boot/grub/fonts/unicode.pf2=$GRUB_ROOT/share/grub/ascii.pf2"
 
-    - name: Build rhboot/shim and MOKManager
+    - name: Download prebuilt Microsoft-signed shim
       run: |
       
-            git clone --recursive --depth 1 https://github.com/rhboot/shim.git
-            cd shim
-        
-            # We define DEFAULT_LOADER to tell shim to look for grubx64.efi
-            make DEFAULT_LOADER=\\\\grubx64.efi
-            
-            cp mmx64.efi ../mmx64.efi
-            cp shimx64.efi ../shimx64.efi
-            cp fbx64.efi ../fbx64.efi
+        mkdir shim-bin
+        cd shim-bin
+
+        # Example: Fedora signed shim RPM (contains shimx64.efi + mmx64.efi)
+        curl -LO https://kojipkgs.fedoraproject.org/packages/shim/16.1/7/x86_64/shim-x64-16.1-7.x86_64.rpm
+
+        # Extract RPM (no root needed)
+        rpm2cpio shim-x64-*.rpm | cpio -idmv
+
+        # Copy relevant EFI binaries
+        cp ./usr/share/shim/shimx64.efi ../shimx64.efi
+        cp ./usr/share/shim/mmx64.efi ../mmx64.efi
+
+        # fallback binary may or may not exist depending on build
+        if [ -f ./usr/share/shim/fbx64.efi ]; then
+            cp ./usr/share/shim/fbx64.efi ../fbx64.efi
+        fi
 
     - name: Strip EFI binaries and modules
       run: |
@@ -90,23 +108,10 @@ jobs:
         find . -type f -name "*.efi" | xargs -i strip --strip-unneeded '{}'        
         find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i strip --strip-unneeded '{}'
 
-    - name: Generate Secure Boot keys and Certificate
-      run: |
-        # Generate private key and PEM cert
-        openssl req -new -x509 -newkey rsa:4096 \
-          -keyout db.key -out db.crt -nodes -days 18250 \
-          -subj "/CN=Puppy Linux Secure Boot Certificate/"
-        
-        # Convert PEM to DER (.cer) for UEFI enrollment
-        openssl x509 -in db.crt -outform DER -out puppy.cer
-
     - name: Sign EFI
       run: |
 
-        for efi_file in grubx64.efi mmx64.efi shimx64.efi fbx64.efi
-        do
-          sbsign --key db.key --cert db.crt --output ${efi_file}.signed $efi_file
-        done
+        sbsign --key db.key --cert db.crt --output grubx64.signed $efi_file
         
     - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
@@ -117,13 +122,15 @@ jobs:
         
         # Copy Binaries
 
-        for efi_file in grubx64.efi mmx64.efi fbx64.efi shimx64.efi
+        cp grubx64.efi.signed esp/EFI/BOOT/grubx64.efi
+
+        for efi_file in mmx64.efi fbx64.efi shimx64.efi
         do
-          cp ${efi_file}.signed esp/EFI/BOOT/${efi_file}
+          cp ${efi_file} esp/EFI/BOOT/${efi_file}
         done
 
         #default boot
-        cp shimx64.efi.signed esp/EFI/BOOT/BOOTX64.EFI
+        cp shimx64.efi esp/EFI/BOOT/BOOTX64.EFI
 
         cp bootx64.csv esp/EFI/BOOT/BOOTX64.CSV
                 
