@@ -93,6 +93,7 @@ jobs:
       run: |
 
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
+        find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i sbsign --key db.key --cert db.crt --output {} {}
 
     - name: Download prebuilt Microsoft-signed shim
       run: |
