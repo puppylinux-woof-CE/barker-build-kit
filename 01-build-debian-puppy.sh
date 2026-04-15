@@ -520,8 +520,8 @@ echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
 rm -f ${WKGBASE}/${ROOTFS}/etc/os-release
 cp -f ${WKGBASE}/${ROOTFS}/usr/lib/os-release ${WKGBASE}/${ROOTFS}/etc/os-release
 
-sed -i -e 's#^PRETTY_NAME=.*#PRETTY_NAME="'${OS_RELEASE_PRETTY_NAME}'"#' ${WKGBASE}/${ROOTFS}/etc/os-release
-sed -i -e 's#^NAME=.*#NAME="'${OS_RELEASE_NAME}'"#' ${WKGBASE}/${ROOTFS}/etc/os-release
+sed -i -e 's#^PRETTY_NAME=.*#PRETTY_NAME="'${OS_RELEASE_PRETTY_NAME}'"#g' ${WKGBASE}/${ROOTFS}/etc/os-release
+sed -i -e 's#^NAME=.*#NAME="'${OS_RELEASE_NAME}'"#g' ${WKGBASE}/${ROOTFS}/etc/os-release
 sed -i -e 's#^VERSION_CODENAME=.*#VERSION_CODENAME="'${DEBIAN_VERSION_NAME}'"#' ${WKGBASE}/${ROOTFS}/etc/os-release
 
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
