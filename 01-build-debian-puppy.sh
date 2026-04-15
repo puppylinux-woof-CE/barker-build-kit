@@ -1,5 +1,5 @@
 #!/bin/bash
-# Debian testing Desktop Bootstrap Script with Root Password Setup
+# Debian Sid Desktop Bootstrap Script with Root Password Setup
 # created 20250628
 # modified by mistfire
 
@@ -515,7 +515,11 @@ cp -f ${WKGBASE}/external-tools/update-system-packages ${WKGBASE}/${ROOTFS}/usr/
 
 chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/dpkg-split-status-file
 
-echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf 
+echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
+
+#rm -f ${WKGBASE}/${ROOTFS}/etc/os-release
+#cp -f ${WKGBASE}/${ROOTFS}/usr/lib/os-release ${WKGBASE}/${ROOTFS}/etc/os-release
+#sed -i -e 's#^NAME=.*#NAME="'$OS_RELEASE_NAME'"#' ${WKGBASE}/${ROOTFS}/etc/os-release
 
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
 
