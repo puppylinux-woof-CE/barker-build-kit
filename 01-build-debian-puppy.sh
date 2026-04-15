@@ -524,6 +524,11 @@ sed -i -e 's/^PRETTY_NAME=.*/PRETTY_NAME="'"${OS_RELEASE_PRETTY_NAME}"'"/g' ${WK
 sed -i -e 's/^NAME=.*/NAME="'"${OS_RELEASE_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
 sed -i -e 's/^VERSION_CODENAME=.*/VERSION_CODENAME="'"${DEBIAN_VERSION_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
 
+for issuef in issue issue.net
+do
+ echo "${DISTRO_NAME}" > ${WKGBASE}/${ROOTFS}/etc/${issuef}
+done
+
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
 
 echo
