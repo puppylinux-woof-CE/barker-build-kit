@@ -64,17 +64,14 @@ jobs:
         run: |              
               chmod +x ./04-process-initrd.sh
               ./04-process-initrd.sh
-      
-      - name: Putting output build to tarball
-        shell: bash
-        run: |                            
-              tar -cJf $DISTRO_NAME-$DISTRO_VERSION.tar.xz -C puppy-livecd-build .              
-
+                 
       - name: Upload output build
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.DISTRO_NAME }}-${{ env.DISTRO_VERSION }}-main-files
-          path: ${{ env.DISTRO_NAME }}-${{ env.DISTRO_VERSION }}.tar.xz
+          path: |
+                puppy-livecd-build/${{ env.DISTRO_PUPPYSFS }}
+                puppy-livecd-build/initrd.xz
           compression-level: 0 
 
       - name: Upload output build
