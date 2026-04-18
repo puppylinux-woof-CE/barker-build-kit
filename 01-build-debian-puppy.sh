@@ -526,7 +526,7 @@ sed -i -e 's/^VERSION_CODENAME=.*/VERSION_CODENAME="'"${DEBIAN_VERSION_NAME}"'"/
 
 for issuef in issue issue.net
 do
- echo "${DISTRO_NAME}" > ${WKGBASE}/${ROOTFS}/etc/${issuef}
+ echo "${OS_RELEASE_PRETTY_NAME}" > ${WKGBASE}/${ROOTFS}/etc/${issuef}
 done
 
 chroot ${WKGBASE}/${ROOTFS} update-cache.sh y
