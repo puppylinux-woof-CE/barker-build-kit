@@ -72,6 +72,7 @@ jobs:
 
     - name: Build Standalone EFI
       run: |
+      
         GRUB_ROOT=$(pwd)/grub-src/output
         
         # Now --disable-shim-lock will actually BE recognized because we are
@@ -87,6 +88,7 @@ jobs:
 
     - name: Sign and Package
       run: |
+      
         # Sign the result
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
         
@@ -102,7 +104,7 @@ jobs:
         cp shimx64.efi esp/EFI/BOOT/BOOTX64.EFI
         cp grubx64.efi.signed esp/EFI/BOOT/grubx64.efi
         cp mmx64.efi esp/EFI/BOOT/mmx64.efi
-        cp puppy.cer esp/EFI/BOOT/puppy.cer
+        cp puppy.cer esp/EFI/puppy.cer
 
         tar -cJf puppy-grub-payload.tar.xz -C esp .
 
