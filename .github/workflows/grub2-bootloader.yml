@@ -20,7 +20,7 @@ jobs:
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo sbsigntool openssl \
           xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont rpm2cpio cpio dpkg-dev
+          libnss3-dev gnu-efi unifont rpm2cpio cpio dpkg-dev gawk
           
     - name: Generate Secure Boot keys
       run: |
@@ -58,6 +58,9 @@ jobs:
           --target=x86_64 \
           --prefix=/ \
           --disable-werror
+
+        export AWK=gawk
+          
         make -j$(nproc)
         # Install to a local subdirectory to avoid permission/system issues
         make install DESTDIR=$(pwd)/output
