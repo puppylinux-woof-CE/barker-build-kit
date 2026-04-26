@@ -13,21 +13,30 @@ jobs:
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
           sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont
+          libnss3-dev gnu-efi unifont rpm2cpio cpio
 
     - name: Generate Secure Boot keys and Certificate
       run: |
-        # Generate private key and PEM cert
         openssl req -new -x509 -newkey rsa:4096 \
           -keyout db.key -out db.crt -nodes -days 18250 \
           -subj "/CN=Puppy Linux Secure Boot Certificate/"
-        
-        # Convert PEM to DER (.cer) for UEFI enrollment
         openssl x509 -in db.crt -outform DER -out puppy.cer
+
+    - name: Clone and Patch GRUB Source
+      run: |
+        git clone --depth 1 https://git.savannah.gnu.org/git/grub.git
+        cd grub
+        
+        # This patch disables the registration of the shim_lock verifier.
+        # Without the verifier registered, GRUB will not enforce signature checks on kernels.
+        echo "Applying shim_lock bypass patch..."
+        sed -i 's/grub_verifier_register (&shim_lock_verifier);/\/\/grub_verifier_register (\&shim_lock_verifier);/g' grub-core/commands/efi/shim_lock.c
+        
+        # Double check the patch was applied
+        grep "//grub_verifier_register" grub-core/commands/efi/shim_lock.c
 
     - name: Build GRUB from source
       run: |
-        git clone --depth 1 https://git.savannah.gnu.org/git/grub.git
         cd grub
         ./bootstrap
         ./configure \
@@ -36,23 +45,20 @@ jobs:
           --prefix=/ \
           --disable-werror
         make -j$(nproc)
-        # Install to a local subdirectory to avoid permission/system issues
         make install DESTDIR=$(pwd)/output
 
     - name: Create advanced early.cfg
       run: |
         cat > early.cfg << 'EOF'
-        # Scan for existing configs
+        set prefix=(memdisk)/boot/grub
         for loc in /grub.cfg /boot/grub.cfg /boot/efi/grub.cfg /boot/efi/grub/grub.cfg /boot/efi/grub2/grub.cfg /grub/grub.cfg /grub2/grub.cfg; do
             search --file --set=root $loc
             if [ -f ($root)$loc ]; then
                 configfile ($root)$loc
             fi
         done
-
         menuentry "GRUB Shell" { terminal_input console; terminal_output console }
         menuentry "Reboot" { reboot }
-        menuentry "Poweroff" { halt }
         EOF
 
     - name: Build EFI binaries
@@ -67,11 +73,7 @@ jobs:
         puppy,8,Puppy Linux,puppy,26.01,https://puppylinux.com/
         EOF
 
-        cat > bootx64.csv << 'EOF'
-        shimx64.efi,puppy,,This is the boot entry for puppy
-        EOF
-
-        
+        # We keep --disable-shim-lock just in case the source supports the flag
         $BINDIR/grub-mkstandalone \
           -O x86_64-efi \
           --compress=xz \
@@ -79,65 +81,39 @@ jobs:
           --directory=$MODDIR \
           --core-compress=xz \
           --disable-shim-lock \
-          -x db.crt \
           -o grubx64.efi \
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
           "boot/grub/grub.cfg=early.cfg"
         
-    - name: Strip EFI binaries and modules
-      run: |
-
-        find . -type f -name "*.efi" | xargs -i strip --strip-unneeded '{}'        
-        find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i strip --strip-unneeded '{}'
-
     - name: Sign Grub EFI
       run: |
-
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
-        #find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i sbsign --key db.key --cert db.crt --output {} {}
 
     - name: Download prebuilt Microsoft-signed shim
       run: |
-      
-        mkdir shim-bin
-        cd shim-bin
-
-        # Example: Fedora signed shim RPM (contains shimx64.efi + mmx64.efi)
+        mkdir shim-bin && cd shim-bin
         curl -LO https://kojipkgs.fedoraproject.org/packages/shim/16.1/7/x86_64/shim-x64-16.1-7.x86_64.rpm
-
-        # Extract RPM (no root needed)
         rpm2cpio shim-x64-*.rpm | cpio -idmv
-
         find . -type f -name "*.efi" | xargs -i cp {} ../
         
-    - name: Prepare ESP layout (Modules + Fonts + Cert)
+    - name: Prepare ESP layout
       run: |
-      
-        mkdir -p esp/EFI/BOOT/grub/fonts
         mkdir -p esp/EFI/BOOT/grub/x86_64-efi
         mkdir -p esp/keys
         
-        # Copy Binaries
-
         cp grubx64.efi.signed esp/EFI/BOOT/grubx64.efi
-
-        for efi_file in mmx64.efi fbx64.efi shimx64.efi
-        do
-          cp ${efi_file} esp/EFI/BOOT/${efi_file}
-        done
-
-        #default boot
+        cp mmx64.efi esp/EFI/BOOT/mmx64.efi
+        cp fbx64.efi esp/EFI/BOOT/fbx64.efi
+        cp shimx64.efi esp/EFI/BOOT/shimx64.efi
         cp shimx64.efi esp/EFI/BOOT/BOOTX64.EFI
-
-        cp bootx64.csv esp/EFI/BOOT/BOOTX64.CSV
-                
-        # Copy Certificate for easy access
-        cp puppy.cer esp/keys/puppy-enroll-me.cer
         
-        # Copy Modules and Fonts
+        cat > esp/EFI/BOOT/BOOTX64.CSV << 'EOF'
+        shimx64.efi,puppy,,This is the boot entry for puppy
+        EOF
+
+        cp puppy.cer esp/keys/puppy-enroll-me.cer
         cp -r grub/output/lib/grub/x86_64-efi/*.mod esp/EFI/BOOT/grub/x86_64-efi/
         cp -r grub/output/lib/grub/x86_64-efi/*.lst esp/EFI/BOOT/grub/x86_64-efi/
-        cp grub/output/share/grub/*.pf2 esp/EFI/BOOT/grub/fonts/ || true
 
     - name: Package ESP tarball
       run: tar -cJf puppy-grub-efi-pack.tar.xz -C esp .
