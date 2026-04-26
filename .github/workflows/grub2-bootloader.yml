@@ -8,8 +8,11 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        # Enable deb-src to get the patched source
-        sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
+        
+        # This finds all active 'deb' lines and adds a 'deb-src' equivalent
+        # works for both the old sources.list and the new .sources format
+        sudo find /etc/apt/sources.list* -type f -exec sed -i 'p; s/^deb /deb-src /' {} +
+        
         sudo apt-get update
         sudo apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
