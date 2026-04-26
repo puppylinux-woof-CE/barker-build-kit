@@ -42,12 +42,12 @@ jobs:
         apt-get source grub2
         
         # Move the extracted directory to a fixed name for the next steps
-        mv grub2-*/ ../grub-src
+        mv grub2-*/ ../grub
 
     - name: Build Patched GRUB
       run: |
       
-        cd grub-src
+        cd grub
         
         # Robust check for the generation script
         if [ -f ./autogen.sh ]; then
