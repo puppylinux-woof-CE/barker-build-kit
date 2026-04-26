@@ -9,9 +9,14 @@ jobs:
     - name: Install dependencies
       run: |
         
-        # This finds all active 'deb' lines and adds a 'deb-src' equivalent
-        # works for both the old sources.list and the new .sources format
-        sudo find /etc/apt/sources.list* -type f -exec sed -i 'p; s/^deb /deb-src /' {} +
+        # Fix for the new Ubuntu .sources format
+        if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+          sudo sed -i 's/Types: deb/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
+        fi
+        # Fallback for older format
+        if [ -f /etc/apt/sources.list ]; then
+          sudo sed -i 'p; s/^deb /deb-src /' /etc/apt/sources.list
+        fi
         
         sudo apt-get update
         sudo apt-get install -y \
