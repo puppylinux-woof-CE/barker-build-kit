@@ -12,19 +12,9 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        
-        # Fix for the new Ubuntu .sources format
-        if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
-          sudo sed -i 's/Types: deb/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
-        fi
-        
-        # Fallback for older format
-        if [ -f /etc/apt/sources.list ]; then
-          sudo sed -i 'p; s/^deb /deb-src /' /etc/apt/sources.list
-        fi
-        
-        sudo apt-get update
-        sudo apt-get install -y \
+                
+        apt update
+        apt install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo sbsigntool openssl \
           xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
@@ -41,12 +31,12 @@ jobs:
     - name: Download Debian GRUB Source
       run: |
       
-        # This downloads, extracts, and applies Debian's patches automatically
-        mkdir grub-debian && cd grub-debian
-        apt-get source grub2
+         # This downloads, extracts, and applies Debian's patches automatically
+         mkdir grub-debian && cd grub-debian
+         apt-get source grub2
         
-        # Move the extracted directory to a fixed name for the next steps
-        mv grub2-*/ ../grub
+         # Move the extracted directory to a fixed name for the next steps
+         mv grub2-*/ ../grub
 
     - name: Build Patched GRUB
       run: |
