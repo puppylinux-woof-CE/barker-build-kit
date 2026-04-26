@@ -5,6 +5,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    container:
+      image: debian:sid
+    
     steps:
     - name: Install dependencies
       run: |
