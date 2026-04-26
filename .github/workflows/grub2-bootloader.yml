@@ -43,7 +43,16 @@ jobs:
     - name: Build Patched GRUB
       run: |
         cd grub-src
-        ./bootstrap
+        
+        # Robust check for the generation script
+        if [ -f ./autogen.sh ]; then
+          ./autogen.sh
+        elif [ -f ./bootstrap ]; then
+          ./bootstrap
+        else
+          autoreconf -fvi
+        fi
+        
         # The Debian source now recognizes the configuration needed for their patches
         ./configure \
           --with-platform=efi \
