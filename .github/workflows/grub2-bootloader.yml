@@ -1,33 +1,33 @@
-name: Build GRUB2 (Debian Source) for Puppy
+name: Build GRUB2 EFI Package for Puppy
 on:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     container:
       image: debian:sid
     
     steps:
     - name: Install dependencies
       run: |
-          
-          echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" >> /etc/apt/sources.list
-          
-          apt update 
-          apt install -y \
+        echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+        apt-get update
+        apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
-          gettext autopoint python3 rsync texinfo sbsigntool openssl \
-          xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont rpm2cpio cpio dpkg-dev gawk
-          
-    - name: Generate Secure Boot keys
+          gettext autopoint python3 rsync texinfo \
+          sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
+          libnss3-dev gnu-efi unifont gawk
+
+    - name: Generate Secure Boot keys and Certificate
       run: |
+        # Generate private key and PEM cert
         openssl req -new -x509 -newkey rsa:4096 \
           -keyout db.key -out db.crt -nodes -days 18250 \
-          -subj "/CN=Puppy Linux Secure Boot/"
-          
+          -subj "/CN=Puppy Linux Secure Boot Certificate/"
+        
+        # Convert PEM to DER (.cer) for UEFI enrollment
         openssl x509 -in db.crt -outform DER -out puppy.cer
 
     - name: Download Debian GRUB Source
@@ -43,11 +43,10 @@ jobs:
       run: |
         cd grub
         
-        # Robust check for the generation script
-        if [ -f ./autogen.sh ]; then
-          ./autogen.sh
-        elif [ -f ./bootstrap ]; then
+        if [ -f ./bootstrap ]; then
           ./bootstrap
+        elif [ -f ./autogen.sh ]; then
+          ./autogen.sh
         else
           autoreconf -fvi
         fi
@@ -111,16 +110,18 @@ jobs:
         
     - name: Strip EFI binaries and modules
       run: |
+
         find . -type f -name "*.efi" | xargs -i strip --strip-unneeded '{}'        
         find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i strip --strip-unneeded '{}'
 
     - name: Sign Grub EFI
       run: |
+
         sbsign --key db.key --cert db.crt --output grubx64.efi.signed grubx64.efi
-        #find grub/output/lib/grub/x86_64-efi -type f -name "*.mod" | xargs -i sbsign --key db.key --cert db.crt --output {} {}
 
     - name: Download prebuilt Microsoft-signed shim
       run: |
+      
         mkdir shim-bin
         cd shim-bin
 
@@ -134,6 +135,7 @@ jobs:
         
     - name: Prepare ESP layout (Modules + Fonts + Cert)
       run: |
+      
         mkdir -p esp/EFI/BOOT/grub/fonts
         mkdir -p esp/EFI/BOOT/grub/x86_64-efi
         mkdir -p esp/keys
@@ -168,7 +170,5 @@ jobs:
       with:
         name: puppy-grub-build
         path: |
-          puppy-grub-efi-pack.tar.xz
-          puppy.cer
           puppy-grub-efi-pack.tar.xz
           puppy.cer
