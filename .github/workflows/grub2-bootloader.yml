@@ -18,7 +18,7 @@ jobs:
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
           sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont gawk
+          libnss3-dev gnu-efi unifont gawk cpio rpm
 
     - name: Generate Secure Boot keys and Certificate
       run: |
