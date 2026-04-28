@@ -118,7 +118,7 @@ jobs:
         
         # Copy Binaries
 
-        cp grubx64.efi.signed esp/EFI/BOOT/grubx64.efi
+        cp grubx64.efi esp/EFI/BOOT/grubx64.efi
 
         for efi_file in mmx64.efi fbx64.efi shimx64.efi
         do
