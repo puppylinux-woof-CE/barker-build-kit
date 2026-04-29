@@ -18,7 +18,7 @@ jobs:
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
           sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont gawk cpio rpm wget
+          libnss3-dev gnu-efi unifont gawk cpio rpm wget rpm2cpio
 
     - name: Generate Secure Boot keys and Certificate
       run: |
@@ -141,8 +141,9 @@ jobs:
         wget -v -O shim.rpm $SHIM_URL
 
         # Extract RPM (no root needed)
-        rpm2cpio shim.rpm | cpio -idmv
-
+        #rpm2cpio shim.rpm | cpio -idmv
+        rpm2archive - < shim.rpm | tar -xv
+        
         find . -type f -name "*.efi" | xargs -i cp {} ../
         
     - name: Prepare ESP layout (Modules + Fonts + Cert)
@@ -163,7 +164,6 @@ jobs:
 
         #default boot
         cp shimx64.efi esp/EFI/BOOT/BOOTX64.EFI
-
         cp bootx64.csv esp/EFI/BOOT/BOOTX64.CSV
                 
         # Copy Certificate for easy access
