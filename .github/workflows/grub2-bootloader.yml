@@ -5,15 +5,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    container:
+      image: debian:sid
+    
     steps:
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
+        echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+        apt-get update
+        apt-get install -y \
           build-essential autoconf automake bison flex libtool pkg-config \
           gettext autopoint python3 rsync texinfo \
           sbsigntool openssl xorriso xz-utils mtools dosfstools liblzma-dev libfreetype-dev \
-          libnss3-dev gnu-efi unifont
+          libnss3-dev gnu-efi unifont gawk cpio rpm wget
 
     - name: Generate Secure Boot keys and Certificate
       run: |
@@ -25,16 +30,36 @@ jobs:
         # Convert PEM to DER (.cer) for UEFI enrollment
         openssl x509 -in db.crt -outform DER -out puppy.cer
 
-    - name: Build GRUB from source
+    - name: Download Debian GRUB Source
       run: |
-        git clone --depth 1 https://git.savannah.gnu.org/git/grub.git
+        # This downloads, extracts, and applies Debian's patches automatically
+        mkdir grub-debian && cd grub-debian
+        apt-get source grub2
+        
+        # Move the extracted directory to a fixed name for the next steps
+        mv grub2-*/ ../grub
+
+    - name: Build Patched GRUB
+      run: |
         cd grub
-        ./bootstrap
+        
+        if [ -f ./bootstrap ]; then
+          ./bootstrap
+        elif [ -f ./autogen.sh ]; then
+          ./autogen.sh
+        else
+          autoreconf -fvi
+        fi
+        
+        # The Debian source now recognizes the configuration needed for their patches
         ./configure \
           --with-platform=efi \
           --target=x86_64 \
           --prefix=/ \
           --disable-werror
+
+        export AWK=gawk
+          
         make -j$(nproc)
         # Install to a local subdirectory to avoid permission/system issues
         make install DESTDIR=$(pwd)/output
@@ -76,11 +101,12 @@ jobs:
           -O x86_64-efi \
           --compress=xz \
           --sbat=sbat.csv \
-          --disable-shim-lock \
           --directory=$MODDIR \
+          --core-compress=xz \
+          --disable-shim-lock \
           -o grubx64.efi \
           --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font" \
-          "boot/grub/grub.cfg=early.cfg" "boot/grub/fonts/unicode.pf2=$GRUB_ROOT/share/grub/ascii.pf2"
+          "boot/grub/grub.cfg=early.cfg"
         
     - name: Strip EFI binaries and modules
       run: |
@@ -99,11 +125,13 @@ jobs:
         mkdir shim-bin
         cd shim-bin
 
+        SHIM_URL=" https://kojipkgs.fedoraproject.org/packages/shim/16.1/7/x86_64/shim-x64-16.1-7.x86_64.rpm"
+
         # Example: Fedora signed shim RPM (contains shimx64.efi + mmx64.efi)
-        curl -LO https://kojipkgs.fedoraproject.org/packages/shim/16.1/7/x86_64/shim-x64-16.1-7.x86_64.rpm
+        wget -v -O shim.rpm $SHIM_URL
 
         # Extract RPM (no root needed)
-        rpm2cpio shim-x64-*.rpm | cpio -idmv
+        rpm2cpio shim.rpm | cpio -idmv
 
         find . -type f -name "*.efi" | xargs -i cp {} ../
         
