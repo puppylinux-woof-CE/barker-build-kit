@@ -114,7 +114,7 @@ jobs:
           --core-compress=xz \
           --fonts="ascii" \
           -o grubx64.efi \
-          --modules="part_gpt part_msdos fat exfat ntfs ext2 f2fs btrfs hfsplus udf normal configfile search search_fs_file search_fs_uuid linux chain loopback iso9660 efi_gop gfxterm all_video font gettext" \
+          --modules="all_video boot btrfs cat chain configfile echo efifwsetup efinet efi_gop ext2 exfat f2fs fat font gettext gfxmenu gfxterm gfxterm_background gzio halt help hfsplus iso9660 jpeg keystatus loadenv loopback linux ls lsefi lsefimmap lsefisystab lssal memdisk minicmd normal ntfs part_apple part_msdos part_gpt password_pbkdf2 png probe reboot regexp search search_fs_uuid search_fs_file search_label sleep smbios squash4 test true udf video" \
           "boot/grub/grub.cfg=early.cfg"
         
     - name: Strip EFI binaries and modules
