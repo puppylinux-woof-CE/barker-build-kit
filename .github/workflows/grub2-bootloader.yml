@@ -134,14 +134,14 @@ jobs:
         mkdir shim-bin
         cd shim-bin
 
-        SHIM_URL=" https://kojipkgs.fedoraproject.org/packages/shim/16.1/7/x86_64/shim-x64-16.1-7.x86_64.rpm"
+        SHIM_URL="https://kojipkgs.fedoraproject.org/packages/shim/16.1/8/x86_64/shim-x64-16.1-8.x86_64.rpm"
 
         # Example: Fedora signed shim RPM (contains shimx64.efi + mmx64.efi)
         wget -v -O shim.rpm $SHIM_URL
 
         # Extract RPM (no root needed)
         #rpm2cpio shim.rpm | cpio -idmv
-        rpm2archive - < shim.rpm | tar -xv
+        rpm2archive - < shim.rpm | tar -zxv
         
         find . -type f -name "*.efi" | xargs -i cp {} ../
         
