@@ -168,7 +168,7 @@ for ONE_PUP in $PUPS; do
 	[ "$PKNLPARMS" ] && PARMSspec=" ${PKNLPARMS}"
 	[ "$PFIXPARMS" ] && PFIXspec=" pfix=${PFIXPARMS}"
 	if [ "$ROTATE" != "0" -a "$PSAVEID" ]; then 
-		BLK_LINE="$(busybox blkid | grep "$PSAVEID")"
+		BLK_LINE="$(blkid | grep "$PSAVEID")"
 		SAVE_PART="${BLK_LINE%%:*}"; SAVE_PART="${SAVE_PART#/dev/}"
 		get_device "$SAVE_PART"
 		if [ -f /sys/block/$get_device_RET/queue/rotational ]; then

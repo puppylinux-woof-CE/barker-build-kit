@@ -62,7 +62,7 @@ MNTD_FN="/tmp/frugalpup_$$_did_mount.txt"
 TMP_BLK="/tmp/${myName}_$$_blk_list.txt"
 TMP_LIST="/tmp/${myName}_$$_tmp_list.txt"
 
-busybox blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
+blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
 [ "$(grep 'vfat' "$TMP_BLK")" ] || error_exit "$(gettext 'No fat32 partitions found')"
 
 SFS_PART=''; SFS_DIR=''

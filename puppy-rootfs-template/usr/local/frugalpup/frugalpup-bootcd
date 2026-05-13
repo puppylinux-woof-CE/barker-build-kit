@@ -36,7 +36,7 @@ ISO_TAR=''
 [ "$ISO_TAR" ] || error_exit "$(gettext 'grub2-iso support missing')"
 
 TMP_BLK="/tmp/${myName}_$$_blk_list.txt"
-busybox blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
+blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
 TMP_LIST="/tmp/${myName}_$$_tmp_list.txt"
 [ -f "$TMP_LIST" ] && rm "$TMP_LIST"
 

@@ -387,7 +387,7 @@ grub2_chk
 . "$UTILS_DIR/functions_part"
 
 TMP_BLK="/tmp/${myName}_$$_blk_list.txt"
-busybox blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
+blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
 
 boot_part_chk
 

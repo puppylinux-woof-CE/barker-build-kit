@@ -139,7 +139,7 @@ ${Tm6}" \
 		done
 		if [ "$PSFSID" ]; then
 			TMP_BLK="/tmp/${myName}_$$_blk_list.txt"
-			busybox blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' > "$TMP_BLK"
+			blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' > "$TMP_BLK"
 			ID_PART="$(grep "=\"${PSFSID}\"" "$TMP_BLK" | cut -f1 -d':')"
 			[ "$ID_PART" ] || error_exit "$(gettext 'Puppy install partition is not available')
 $(gettext 'Probably due to unplugged usb boot device')"

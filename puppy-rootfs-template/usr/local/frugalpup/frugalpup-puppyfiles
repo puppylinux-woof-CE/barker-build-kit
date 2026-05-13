@@ -48,7 +48,7 @@ SFS_PART=''; SFS_DIR=''; SFS_LABEL=''
 [ "$CACHE_FN" ] && [ -f "$CACHE_FN" ] && . "$CACHE_FN"
 
 TMP_BLK="/tmp/${myName}_$$_blk_list.txt"
-busybox blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
+blkid | grep -v 'squashfs' | grep -v 'swap' | grep -v 'zram' | sort > "$TMP_BLK"
 
 SRC_TYPE='';SRC_DIR=''; SRC_FN=''
 
