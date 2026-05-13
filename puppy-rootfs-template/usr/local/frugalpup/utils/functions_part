@@ -6,8 +6,8 @@ get_part_id() {
 	# "$1" - partition - ex: sda3
 	get_part_id_RET=''
 	[ "$1" ] || return 1
-	local ID="$(busybox blkid /dev/$1 | grep -o ' LABEL=.*' | cut -f2 -d '"')"
-	[ "$ID" ] || ID="$(busybox blkid /dev/$1 | grep -o ' UUID=.*' | cut -f2 -d '"')"
+	local ID="$(blkid /dev/$1 | grep -o ' LABEL=.*' | cut -f2 -d '"')"
+	[ "$ID" ] || ID="$(blkid /dev/$1 | grep -o ' UUID=.*' | cut -f2 -d '"')"
 	[ "$ID" ] && get_part_id_RET="$ID"
 	# "$1" - partition - ex: sda3
 }
@@ -16,7 +16,7 @@ get_part_fs() {
 	# "$1" - partition - ex: sda3
 	get_part_fs_RET=''
 	[ "$1" ] || return 1
-	local FS="$(busybox blkid /dev/$1)"
+	local FS="$(blkid /dev/$1)"
 	if [ "$FS" ]; then
 		FS="${FS#* TYPE=\"}"
 		FS="${FS%%\"*}"
