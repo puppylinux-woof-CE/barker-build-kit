@@ -3,6 +3,8 @@
 export TEXTDOMAIN=frugalpup
 export OUTPUT_CHARSET=UTF-8
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 do_exit() {
 	[ "$VFAT_LIST" ] && [ -e "$VFAT_LIST" ] && rm "$VFAT_LIST"
 	[ "$TMP_LIST" ] && [ -e "$TMP_LIST" ] && rm "$TMP_LIST"
