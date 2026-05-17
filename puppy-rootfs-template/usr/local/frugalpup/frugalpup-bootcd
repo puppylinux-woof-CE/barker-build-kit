@@ -1,5 +1,7 @@
 #!/bin/ash
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 export TEXTDOMAIN=frugalpup
 export OUTPUT_CHARSET=UTF-8
 
