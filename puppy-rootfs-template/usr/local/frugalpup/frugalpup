@@ -1,5 +1,7 @@
 #!/bin/ash
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 do_exit() {
 	[ "$CACHE_FN" ] && [ -f "$CACHE_FN" ] && rm "$CACHE_FN"
 	[ -f "$TMP_LIST" ] && rm "$TMP_LIST"
