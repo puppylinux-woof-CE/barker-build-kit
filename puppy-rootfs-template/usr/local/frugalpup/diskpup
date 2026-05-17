@@ -219,7 +219,8 @@ get_install_location() {
 	[ $? -eq 0 ] || error_exit
 #	[ -d "$INSTL_DIR" ] || error_exit "$(gettext 'No install directory selected')"
 
-	DIR_MP="$(stat -Lc %m "$INSTL_DIR")"
+	DIR_MP="$(findmnt -no TARGET "$INSTL_DIR")"
+
 	if [ "$DIR_MP" != "$SFS_MP" ]; then
 		SFS_PART="$(grep -m1 "$DIR_MP" /proc/mounts | cut -f1 -d' ')"
 		SFS_PART="${SFS_PART#/dev/}"
