@@ -323,7 +323,7 @@ ${Tm7}" \
 					--filename="${SAVE_MP}${SAVE_DIR%/*}/" \
 					--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
 				[ $? -eq 0 ] || error_exit
-				DIR_MP="$(stat -Lc %m "$SAVE_DIR")"
+				DIR_MP="$(findmnt -no TARGET "$SAVE_DIR")"
 				if [ "$DIR_MP" != "$SAVE_MP" ]; then
 					SAVE_PART="$(grep -m1 "$DIR_MP" /proc/mounts | cut -f1 -d' ')"
 					SAvE_PART="${SAVE_PART#/dev/}"
