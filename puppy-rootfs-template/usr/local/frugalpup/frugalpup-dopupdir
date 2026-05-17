@@ -3,6 +3,8 @@
 export TEXTDOMAIN=frugalpup
 export OUTPUT_CHARSET=UTF-8
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 do_exit() {
 	[ "$SAVE_MTD" ] && umount "$SAVE_MP" 2>/dev/null
 	[ "$DEST_MTD" ] && umount "$DEST_MP" 2>/dev/null
