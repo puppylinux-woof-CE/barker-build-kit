@@ -1,5 +1,7 @@
 #!/bin/ash
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 export TEXTDOMAIN=frugalpup
 export OUTPUT_CHARSET=UTF-8
 
@@ -199,7 +201,7 @@ DEST_DIR="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" \
 	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
 [ $? -eq 0 ] || error_exit
 
-DIR_MP="$(stat -Lc %m "$DEST_DIR")"
+DIR_MP="$(findmnt -no TARGET "$DEST_DIR")"
 if [ "$DIR_MP" != "$DEST_MP" ]; then
 	DEST_PART="$(grep -m1 "$DIR_MP" /proc/mounts | cut -f1 -d' ')"
 	DEST_PART="${DEST_PART#/dev/}"
