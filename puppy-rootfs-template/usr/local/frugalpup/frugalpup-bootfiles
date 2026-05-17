@@ -3,6 +3,8 @@
 export TEXTDOMAIN=frugalpup
 export OUTPUT_CHARSET=UTF-8
 
+[ "$(whoami)" != "root" ] && exec sudo -A $0 $@ 
+
 do_exit() {
 	[ -e "$TMP_LIST" ] && rm "$TMP_LIST"
 	[ -e "$TMP_BLK" ] && rm "$TMP_BLK"
@@ -149,7 +151,7 @@ SRC_DIR="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" \
 	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
 [ $? -eq 0 ] || error_exit
 
-DIR_MP="$(stat -Lc %m "$SRC_DIR")"
+DIR_MP="$(findmnt -no TARGET "$SRC_DIR")"
 if [ "$DIR_MP" != "$SRC_MP" ]; then
 	SRC_PART="$(grep -m1 "$DIR_MP" /proc/mounts | cut -f1 -d' ')"
 	SRC_PART="${SRC_PART#/dev/}"
