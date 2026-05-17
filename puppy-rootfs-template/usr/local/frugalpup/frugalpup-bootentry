@@ -117,7 +117,7 @@ for ONE_PUP in $PUPS; do
 	[ -e "$PUP_DIR/vmlinuz" ] || continue;
 	if [ "$FIRST" ]; then
 		FIRST=''
-		SRC_MP="$(stat -Lc %m $ONE_PUP)"
+		SRC_MP="$(findmnt -no TARGET $ONE_PUP)"
 		SRC_PART="$(grep "$SRC_MP" /proc/mounts | cut -f1 -d' ')"; SRC_PART="${SRC_PART#/dev/}"
 		get_device "$SRC_PART"
 		P_MEDIA1='ata'
