@@ -163,7 +163,10 @@ for ONE_PUP in $PUPS; do
 			PLANGspec=''
 #		fi
 	fi
-	PUP_SUB="${PUP_DIR#${SRC_MP}}"
+
+	SRC_MP2="$(findmnt -no TARGET $PUP_DIR)"
+	PUP_SUB="${PUP_DIR#${SRC_MP2}}"
+
 	PUP_VER="${ONE_PUP##*/}"; PUP_VER="${PUP_VER#puppy_}"; PUP_VER="${PUP_VER%.sfs}"
 	PSAVEID=''; PSAVEDIR=''; SAVEspec=''; SUBspec=''; PKNLPARMS=''; PFIXPARMS=''; PARMSspec=''; PFIXspec=''
 	[ -s "$PUP_DIR/$PARMS_FN" ] && . "$PUP_DIR/$PARMS_FN"
