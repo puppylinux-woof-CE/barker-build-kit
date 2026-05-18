@@ -95,7 +95,7 @@ DEST_MTD="$ensure_mounted_DID"
 if [ "$DO_INSTALL" ]; then
 	if [ "$DO_UEFI" ]; then
 	#	echo "efi"
-		tar -xf "$EFI_TAR" --overwrite -C "$DEST_MP" >/dev/null
+		tar -Jxf "$EFI_TAR" --overwrite -C "$DEST_MP" >/dev/null
 		if [ $? -ne 0 ]; then
 			error_exit "$(gettext 'Failed to write Grub2 efi files to') \"$DEST_PART\""
 		fi
@@ -113,9 +113,9 @@ if [ "$DO_INSTALL" ]; then
 		[ -d "$BIN_DEST" ] && rm -rf "$BIN_DEST"
 		mkdir -p "$BIN_DEST"
 		if [ "$exParm" ]; then
-			tar -xf "$BIN_TAR" --overwrite --exclude="*${exParm}" -C "$BIN_DEST" >/dev/null
+			tar -Jxf "$BIN_TAR" --overwrite --exclude="*${exParm}" -C "$BIN_DEST" >/dev/null
 		else
-			tar -xf "$BIN_TAR" --overwrite -C "$BIN_DEST" >/dev/null
+			tar -Jxf "$BIN_TAR" --overwrite -C "$BIN_DEST" >/dev/null
 		fi
 		if [ $? -ne 0 ]; then
 			error_exit "$(gettext 'Failed to write Grub2 efi files to') \"$DEST_PART\""
@@ -149,7 +149,7 @@ if [ "$DO_INSTALL" ]; then
 
 	if [ "$DO_MBR" ]; then
 	#	echo "mbr"
-		tar -xf "$MBR_TAR" --overwrite -C "$DEST_MP" >/dev/null
+		tar -Jxf "$MBR_TAR" --overwrite -C "$DEST_MP" >/dev/null
 		[ $? -eq 0 ] || error_exit "$(gettext 'Failed to write Grub2 mbr files to') \"$DEST_PART\""
 		get_device "$DEST_PART"
 		"$EXE_DIR/bootlace.com" --boot-prevmbr-last --time-out=0 /dev/$get_device_RET > /dev/null
