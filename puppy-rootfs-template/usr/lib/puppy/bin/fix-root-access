@@ -1,0 +1,39 @@
+#!/bin/bash
+
+file="/etc/login.defs"
+
+if [ -f "$file" ]; then
+
+uid_min=$(awk '
+  /^[[:space:]]*#/ { next }          # skip comments
+  /^[[:space:]]*UID_MIN[[:space:]]+/ {
+    value=$2
+  }
+  END {
+    if (value != "") print value
+  }
+' "$file")
+
+START_UID="$uid_min"	
+
+fi
+	
+	
+for file1 in  $(find /etc/pam.d -type f -maxdepth 1 -name "*")
+do
+
+  [ "$(grep -m1 '!=' $file1)" != "" ] && sed -i -e '/user.*!=.*root/d' $file1
+  
+  if [ "$START_UID" != "" ]; then
+	[ "$(grep -m1 '>=' $file1)" != "" ] && sed -i -e '/uid.*>=.*'$START_UID'/d' $file1
+  fi
+  
+done
+
+
+for file1 in $(find /usr/lib/systemd/user -type f -maxdepth 1 \( -name "*.service" -o -name "*.socket" \))
+do
+
+  [ "$(grep -m1 'ConditionUser=!' $file1)" != "" ] && sed -i -e '/ConditionUser=!root/d' $file1
+
+done
