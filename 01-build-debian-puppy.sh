@@ -495,6 +495,11 @@ if [ -f ${WKGBASE}/${ROOTFS}/usr/lib/puppy/sbin/pipewire-jack-helper.sh ]; then
 	chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/sbin/pipewire-jack-helper.sh
 fi
 
+#fix root account access
+if [ -f ${WKGBASE}/${ROOTFS}/usr/lib/puppy/bin/fix-root-access ]; then
+	chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/fix-root-access
+fi
+
 if [ "$SUDO_GUI" != "" ]; then
    echo "export SUDO_ASKPASS=${SUDO_GUI}" > ${WKGBASE}/${ROOTFS}/etc/profile.d/sudo-askpass.sh
    chmod +x ${WKGBASE}/${ROOTFS}/etc/profile.d/sudo-askpass.sh
