@@ -89,7 +89,7 @@ get_drv_name() {
 
 ${Tm2}" \
 		--list --print-column=2 --radiolist --column=:RD --column=Drive --column=Description < $STICK_LIST \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	DRV_NAME="${DRV_SPEC%%|*}"
 	rm "$STICK_LIST"
@@ -119,7 +119,7 @@ ${Tm3}
 ${Tm4}" \
 		--list --no-headers --print-column=2 --radiolist --column=:RD --column=:TXT --column=:TXT \
 		TRUE 'iso' "  ${Tm7}" FALSE 'zip' "  ${Tm8}" FALSE 'directory' "  ${Tm9}" FALSE 'this' "  ${Tm10}" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	SRC_TYPE="${SRC_SPEC%%|*}"
 
@@ -165,7 +165,7 @@ $(gettext 'Probably due to unplugged usb boot device')"
 			--file --directory --width=600 --height=460 \
 			--text " ${Tm1}" \
 			--filename="/mnt/" \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		SFS_FN="$(find "$SRC_DIR" -maxdepth 1 -type f -name 'puppy_*.sfs')"
 		[ "$SFS_FN" ] || error_exit "$(gettext 'No Puppy files found in') \"$SRC_DIR\""
@@ -177,7 +177,7 @@ $(gettext 'Probably due to unplugged usb boot device')"
 			--file --file-filter "$SRC_TYPE files | *.$SRC_TYPE" --width=600 --height=460 \
 			--text " ${Tm1}" \
 			--filename="$HOME/" \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		[ -d "$SRC_FN" ] && error_exit "$(printf "$(gettext 'No %s file selected')" "$SRC_TYPE")"
 		[ "${SRC_FN##*.}" = "$SRC_TYPE" ] || error_exit "$(printf "$(gettext 'No %s file selected')" "$SRC_TYPE")"
@@ -202,7 +202,7 @@ ${MuPurple}${SRC_DISP}${MuEnd}
 ${MuRed}${Tm2}${MuEnd}
 
 ${Tm3}" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 	[ $? -eq 0 ] || error_exit
 }
 
