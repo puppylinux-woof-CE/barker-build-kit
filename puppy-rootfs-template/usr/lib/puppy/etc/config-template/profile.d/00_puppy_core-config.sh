@@ -92,3 +92,5 @@ if [ "$GTK_MODULES" != "" ] && [ "$(echo "$GTK_MODULES" | grep "canberra\-gtk\-m
 elif [ "$GTK_MODULES" == "" ]; then
  export GTK_MODULES="canberra-gtk-module"
 fi
+
+export GTK_OVERLAY_SCROLLING=0
