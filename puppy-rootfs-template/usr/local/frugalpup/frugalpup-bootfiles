@@ -106,7 +106,7 @@ $(gettext "Or\nselect a partition containing Puppy frugal install(s):")"
 	SRC_SPEC="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" --height=$THT --width=380 \
 		--text "$TMSG" \
 		--list --print-column=1 --column=Partition --column=FileSystem --column=Label < $TMP_LIST \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	rm "$TMP_LIST"
 	if [ "$SRC_SPEC" ]; then
@@ -148,7 +148,7 @@ SRC_DIR="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" \
        ${Tm6}
 " \
 	--filename="$SRC_MP${SFS_DIR%/*}/" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 [ $? -eq 0 ] || error_exit
 
 DIR_MP="$(findmnt -no TARGET "$SRC_DIR")"
@@ -185,7 +185,7 @@ ${MuRed}${Tm3}${MuEnd}
 
 ${Tm4}" \
 		--list --print-column=1 --column=Partition --column=Label < $TMP_LIST \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	rm "$TMP_LIST"
 	[ "$DEST_SPEC" ] || error_exit "$(gettext 'No partition selected')"
@@ -261,7 +261,7 @@ ${Tm3}
 ${MuPurple}${Tm4}${MuEnd} ${Tm5}" \
 	--list --no-headers --print-column=2 --radiolist --column=:RD --column=:TXT --column=:TXT \
 	--rest="$TMP_LIST" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1 )"
 STATUS=$?
 rm "$TMP_LIST"
 [ $STATUS -eq 0 ] || error_exit
@@ -324,7 +324,7 @@ $(gettext 'You can still proceed with the install, which will copy the files int
 ${Tm2}
 
 ${EFI_MSG}${Tm4}" \
-				--button=${TbOk}!gtk-ok:0
+				--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 			[ $? -eq 0 ] || error_exit
 		fi
 	fi
@@ -363,7 +363,7 @@ ${Tm4}
     ${Tm3} ${MuPurple}${SRC_DIR_DISP}${MuEnd}
 
 ${Tm5}" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0
+	 --button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 [ $? -eq 0 ] || error_exit
 
 echo "SFS_PART='$SRC_PART'" > "$CACHE_FN"
