@@ -89,7 +89,7 @@ ${MuRed}${Tm3}${MuEnd}
 
 ${Tm4}" \
 		--list --print-column=1 --column=Partition --column=Label < $VFAT_LIST \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	rm "$VFAT_LIST"
 	[ "$DEST_SPEC" ] || error_exit "$(gettext 'No partition selected')"
@@ -147,7 +147,7 @@ $(gettext 'You can still proceed with the install, which will copy the files int
 ${Tm2}
 
 ${EFI_MSG}${Tm4}" \
-			--button=${TbOk}!gtk-ok:0
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 		[ $? -eq 0 ] || error_exit
 	fi
 }
@@ -181,7 +181,7 @@ get_install_location() {
 		SFS_SPEC="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" --height=220 \
 			--text "${Tm1}" \
 			--list --column=Partition --column=FileSystem --column=Label < $TMP_LIST \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1 )"
 		[ $? -eq 0 ] || error_exit
 		rm "$TMP_LIST"
 		if [ "$SFS_SPEC" ]; then
@@ -215,7 +215,7 @@ get_install_location() {
  ${Tm6}
 " \
 		--filename="${SFS_MP}${SFS_DIR%/*}/" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 #	[ -d "$INSTL_DIR" ] || error_exit "$(gettext 'No install directory selected')"
 
@@ -272,7 +272,7 @@ ${Tm9}
 ${Tm1}" \
 		--list --no-headers --print-column=2 --radiolist --column=:RD --column=:TXT --column=:TXT \
 		TRUE 'iso' "  ${Tm2}" FALSE 'zip' "  ${Tm3}" FALSE 'directory' "  ${Tm4}" FALSE 'this' "  ${Tm5}" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1 )"
 	[ $? -eq 0 ] || error_exit
 	SRC_TYPE="${SRC_SPEC%%|*}"
 	SRC_DIR=''; SRC_FN=''
@@ -313,7 +313,7 @@ $(gettext 'Probably due to unplugged usb boot device')"
 			--file --directory --width=600 --height=460 \
 			--text " ${Tm1}" \
 			--filename="/mnt/" \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		SFS_FN="$(find "$SRC_DIR" -maxdepth 1 -type f -name 'puppy_*.sfs')"
 		[ "$SFS_FN" ] || error_exit "$(gettext 'No Puppy files found in') \"$SRC_DIR\""
@@ -324,7 +324,7 @@ $(gettext 'Probably due to unplugged usb boot device')"
 			--file --file-filter "$SRC_TYPE files | *.$SRC_TYPE" --width=600 --height=460 \
 			--text " ${Tm1}" \
 			--filename="$HOME/" \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		[ -d "$SRC_FN" ] && error_exit "$(printf "$(gettext 'No %s file selected')" "$SRC_TYPE")"
 		[ "${SRC_FN##*.}" = "$SRC_TYPE" ] || error_exit "$(printf "$(gettext 'No %s file selected')" "$SRC_TYPE")"
@@ -361,7 +361,7 @@ ${Tm3}
 ${TYPE_DISP}
 
 ${Tm4}" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 	[ $? -eq 0 ] || error_exit
 }
 
