@@ -64,7 +64,7 @@ SRC_SPEC="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" --height=170 \
 	--text "${Tm1}" \
 	--list --no-headers --print-column=2 --radiolist --column=:RD --column=:TXT --column=:TXT \
 	TRUE 'iso' " ${Tm2}" FALSE 'zip' " ${Tm3}" FALSE 'directory' " ${Tm4}" FALSE 'this' " ${Tm5}" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 [ $? -eq 0 ] || error_exit
 SRC_TYPE="${SRC_SPEC%|}"
 
@@ -105,7 +105,7 @@ elif [ "$SRC_TYPE" = "directory" ]; then
 		--file --directory --width=600 --height=460 \
 		--text " ${Tm1}" \
 		--filename="/mnt/" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	SFS_FN="$(find "$SRC_DIR" -maxdepth 1 -type f -name 'puppy_*.sfs')"
 	[ "$SFS_FN" ] || error_exit "$(gettext 'No Puppy files found in') \"$SRC_DIR\""
@@ -116,7 +116,7 @@ else
 		--file --file-filter "$SRC_TYPE files | *.$SRC_TYPE" --width=600 --height=460 \
 		--text " ${Tm1}" \
 		--filename="$HOME/" \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	[ -d "$SRC_FN" ] && error_exit "$(printf "$(gettext 'No %s file selected')" "$SRC_TYPE")"
 fi
@@ -159,7 +159,7 @@ ${Tm3}"
 	DEST_SPEC="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" --height=$THT \
 		--text "   $TMSG   " \
 		--list --column=Partition --column=FileSystem --column=Label < $TMP_LIST \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	rm "$TMP_LIST"
 	if [ "$DEST_SPEC" ]; then
@@ -198,7 +198,7 @@ DEST_DIR="$(yad $YAD_STD_OPTS --title "${Tt} - ${Tm0}" \
  ${Tm6}
 " \
 	--filename="${DEST_MP}${SFS_DIR%/*}/" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 [ $? -eq 0 ] || error_exit
 
 DIR_MP="$(findmnt -no TARGET "$DEST_DIR")"
@@ -283,7 +283,7 @@ ${Tm4}
 
 ${Tm5}" \
 			--list --column=Partition --column=FileSystem --column=Label < $TMP_LIST \
-			--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+			--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		rm "$TMP_LIST"
 		if [ "$SAVE_SPEC" ]; then
@@ -321,7 +321,7 @@ ${Tm6}
 
 ${Tm7}" \
 					--filename="${SAVE_MP}${SAVE_DIR%/*}/" \
-					--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+					--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 				[ $? -eq 0 ] || error_exit
 				DIR_MP="$(findmnt -no TARGET "$SAVE_DIR")"
 				if [ "$DIR_MP" != "$SAVE_MP" ]; then
@@ -386,7 +386,7 @@ ${Tm8}
 
 ${Tm11}" \
 	--list --no-headers --checklist --print-column=2 --column=:CHK --column=:TXT < "$TMP_LIST" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 		[ $? -eq 0 ] || error_exit
 		XTRA_PARMS="${PARM_SPEC%|}"
 		XTRA_PARMS="${XTRA_PARMS//|
@@ -431,7 +431,7 @@ ${Tm5}" \
 		--field="${Tm8}:CHK" $FSCK_VAL \
 		--field="${Tm9}:CHK" $FSCKP_VAL \
 		--field="${Tm10}:CHK" $TRIM_VAL \
-		--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+		--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 	[ $? -eq 0 ] || error_exit
 	[ "$VALS" ] || error_exit "$(gettext 'No values specified')"
 	[ "${VALS%%|*}" = "TRUE" ] && PFIX_PARMS="${PFIX_PARMS},nox"
@@ -519,7 +519,7 @@ ${Tm4}
     ${MuPurple}${SRC_DISP}${MuEnd}${SAVE_MSG}${DISP_PARMS}${DISP_PFIX}
 
 ${Tm5}" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1
 [ $? -eq 0 ] || error_exit
 
 echo "SRC_TYPE='$SRC_TYPE'" > "$CACHE_FN"
