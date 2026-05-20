@@ -70,7 +70,7 @@ ${Tm12}:LBL" "" \
 	--field="" "$FRUGAL_VAL" \
 	--field="${Tm14}:LBL" "" \
 	--field="" "$MIN_VAL" \
-	--button=${TbCancel}!gtk-cancel:1 --button=${TbOk}!gtk-ok:0)"
+	--button=${TbOk}!gtk-ok:0 --button=${TbCancel}!gtk-cancel:1)"
 [ $? -eq 0 ] || error_exit
 [ "$VALS" ] || error_exit "$(gettext 'No values specified')"
 
