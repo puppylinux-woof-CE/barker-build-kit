@@ -1,5 +1,3 @@
-# /etc/systemd/system/my-background-init.service
-
 [Unit]
 Description=DKMS module check
 After=local-fs.target
