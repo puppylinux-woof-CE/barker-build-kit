@@ -1,0 +1,30 @@
+# /etc/systemd/system/my-background-init.service
+
+[Unit]
+Description=DKMS module check
+After=local-fs.target
+After=remote-fs.target
+Requires=local-fs.target
+
+# Optional:
+# Wait for a specific mount point
+# RequiresMountsFor=/mnt/data
+
+[Service]
+Type=oneshot
+
+# Run long task in background-like mode
+ExecStart=/usr/lib/puppy/bin/dkms-check
+
+# Prevent systemd from considering service inactive immediately
+RemainAfterExit=yes
+
+# Disable timeout for long-running init jobs
+TimeoutStartSec=infinity
+
+# Optional hardening
+# User=root
+# Nice=10
+
+[Install]
+WantedBy=multi-user.target
