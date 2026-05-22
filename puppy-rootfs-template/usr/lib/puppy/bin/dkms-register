@@ -12,13 +12,13 @@ FILEPATH="$1"
 dkms add -m $PACKAGE_NAME -v $PACKAGE_VERSION
 
 #remove old version
-dkms status | while read -r line; do
+dkms status -m $PACKAGE_NAME -k $(uname -r) | while read -r line; do
 
-    module=$(echo "$line" | cut -f 1 -d '/')
-    version=$(echo "$line" | cut -f 2 -d '/' | cut -f 1 -d ':')
+    version=$(echo "$line" | head -n 1 | cut -f 2 -d '/' | cut -f 1 -d ',' | cut -f 1 -d ':')
 
-    versions=$(dkms status "$module" | \
+    versions=$(dkms -m $PACKAGE_NAME -k $(uname -r) | \
         cut -f 2 -d '/' | \
+        cut -f 1 -d ',' | \  
         cut -f 1 -d ':'  | \
         sort -V | uniq)
             
@@ -26,7 +26,7 @@ dkms status | while read -r line; do
     
     if [ "$latest" != "" ] && [ "$version" != "$latest" ]; then
         echo "Removing old DKMS module: $module/$version"
-        dkms remove "$module/$version" --all
+        dkms remove "$PACKAGE_NAME/$version" --all
     fi
     
 done
