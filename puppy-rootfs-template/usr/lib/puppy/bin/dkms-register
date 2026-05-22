@@ -1,0 +1,32 @@
+#!/bin/bash
+
+FILEPATH="$1"
+
+[ "$FILEPATH" == "" ] && exit
+[ "$(basename "$FILEPATH")" != "dkms.conf" ] && exit 
+[ ! -f "$FILEPATH" ] && exit
+[ "$(which dkms)" == "" ] && exit
+
+. "$FILEPATH"
+
+dkms add -m $PACKAGE_NAME -v $PACKAGE_VERSION
+
+#remove old version
+dkms status | while read -r line; do
+
+    module=$(echo "$line" | cut -f 1 -d '/')
+    version=$(echo "$line" | cut -f 2 -d '/' | cut -f 1 -d ':')
+
+    versions=$(dkms status "$module" | \
+        cut -f 2 -d '/' | \
+        cut -f 1 -d ':'  | \
+        sort -V | uniq)
+            
+    latest=$(echo "$versions" | tail -n1)
+    
+    if [ "$latest" != "" ] && [ "$version" != "$latest" ]; then
+        echo "Removing old DKMS module: $module/$version"
+        dkms remove "$module/$version" --all
+    fi
+    
+done
