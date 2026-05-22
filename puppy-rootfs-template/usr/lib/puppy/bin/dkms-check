@@ -20,6 +20,8 @@ else
   
   if [ "$LASTKVER" == "$KERNEL_VERSION" ]; then
    [ "$ARGS" == "" ] && exit 1
+  else
+   echo "$KERNEL_VERSION" > /var/hwdata/kernel.lst
   fi
   
 fi
@@ -31,39 +33,28 @@ echo "Checking DKMS modules for kernel: $KERNEL_VERSION"
 echo "=================================================="
 
 #Scan for registered dkms modules
-dkms status | while read -r line; do
+for dkmod in $(ls /var/lib/dkms 2>/dev/null | tr '\n' ' ')
+do
 
     #Skip empty lines
-    [ -z "$line" ] && continue
+    [ -z "$dkmod" ] && continue
+    
+    echo "-> DKMS module: $dkmod"
+    
+    MODULE_FOUND=1
+    
+    DKMS_LINE="$(dkms status -m $dkmod -k $KERNEL_VERSION)"
 
-    # Parse module name and version using standard 'cut' and 'tr'
-    MODULE_NAME=$(echo "$line" | cut -d'/' -f1)
-    MODULE_VER=$(echo "$line" | cut -d'/' -f2  | cut -f 1 -d ':' | cut -d',' -f1 | tr -d ' ')
-
-    echo "Found registered module: $MODULE_NAME ($MODULE_VER)"
-
-    # Fast check using standard file testing
-    # DKMS modules live either in 'updates/dkms' or 'dkms' subfolders
-    MODULE_FOUND=0
+	if [ "$(echo $DKMS_LINE | grep -E "added|built")" != "" ]; then
+	  MODULE_FOUND=0
+      MODULE_NAME=$(echo $DKMS_LINE | cut -f 1 -d '/')
+      MODULE_VER=$(echo $DKMS_LINE | cut -f 2 -d '/' | cut -f 1 -d ',' | cut -f 1 -d ':')
+    elif [ "$(echo $DKMS_LINE | grep "installed" | grep "Diff")" != "" ]; then
+	  MODULE_FOUND=0
+      MODULE_NAME=$(echo $DKMS_LINE | cut -f 1 -d '/')
+      MODULE_VER=$(echo $DKMS_LINE | cut -f 2 -d '/' | cut -f 1 -d ',' | cut -f 1 -d ':')
+    fi
     
-    # Check if any matching .ko file exists in the standard DKMS paths
-    # We loop over the wildcard match; if a file exists, the loop runs instantly
-    
-    DKMS_FILE=$(file $MODULES_DIR/updates/dkms/)
-    
-    for DKMS_MOD_DIR in $MODULES_DIR/updates/dkms $MODULES_DIR/dkms
-    do
-    
-       DFOUND=$(find $DKMS_MOD_DIR -type f -name "${MODULE_NAME}.ko*" -print -quit 2>/dev/null | xargs)
-       
-       if [ "$DFOUND" != "" ]; then
-            MODULE_FOUND=1
-            break       
-       fi
-       
-    done
-    
-
     if [ "$MODULE_FOUND" -eq 1 ]; then
         echo "  -> Status: OK (Compiled module found)"
     else
@@ -75,8 +66,8 @@ dkms status | while read -r line; do
         
 		echo "Starting DKMS build/install for $MODULE_NAME/$MODULE_VER at $(date)" > "$LOG_FILE"
 		
-		dkms build -m "$MODULE_NAME" -v "$MODULE_VER" -k "$KERNEL_VERSION" >> "$LOG_FILE" 2>&1 && \
-		dkms install -m "$MODULE_NAME" -v "$MODULE_VER" -k "$KERNEL_VERSION" >> "$LOG_FILE" 2>&1
+		dkms build -m "$MODULE_NAME" -v "$MODULE_VER" -k "$KERNEL_VERSION" >> "$LOG_FILE" 2>&1
+		[ $? -eq 0 ] && dkms install -m "$MODULE_NAME" -v "$MODULE_VER" -k "$KERNEL_VERSION" --force >> "$LOG_FILE" 2>&1
 		
 		if [ $? -eq 0 ]; then
 			echo "Successfully installed $MODULE_NAME for $KERNEL_VERSION" >> "$LOG_FILE"
