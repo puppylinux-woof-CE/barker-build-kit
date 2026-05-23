@@ -384,3 +384,5 @@ dkms
 bison
 build-essential
 flex
+perl
+libelf-dev
