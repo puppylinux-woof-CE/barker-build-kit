@@ -2,8 +2,13 @@
 #concepted by mistfire
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo "Error: This script must be run as root (sudo)." >&2
+    echo "Error: This script must be run as root (sudo)."
     exit 1
+fi
+
+if [ "$(which gcc)" == "" ]; then
+   echo "Error: gcc compiler is missing"
+   exit 1
 fi
 
 KERNEL_VERSION=$(uname -r)
@@ -55,6 +60,7 @@ do
       MODULE_VER=$(echo $DKMS_LINE | cut -f 2 -d '/' | cut -f 1 -d ',' | cut -f 1 -d ':')
     fi
     
+    
     if [ "$MODULE_FOUND" -eq 1 ]; then
         echo "  -> Status: OK (Compiled module found)"
     else
@@ -62,7 +68,10 @@ do
         echo "  -> Action: Starting compilation in the background..."
 
         #Compile
-        LOG_FILE="/var/log/dkms_auto_compile_${MODULE_NAME}.log"
+        
+        [ ! -d /var/log/dkms-autobuild ] && mkdir -p /var/log/dkms-autobuild
+        
+        LOG_FILE="/var/log/dkms-autobuild/dkms_${MODULE_NAME}.log"
         
 		echo "Starting DKMS build/install for $MODULE_NAME/$MODULE_VER at $(date)" > "$LOG_FILE"
 		
