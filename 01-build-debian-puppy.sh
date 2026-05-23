@@ -454,6 +454,7 @@ fi
 cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/50excldoc <<EOF
 path-exclude=/usr/share/doc/*
 path-exclude=/usr/doc/*
+path-exclude=/usr/src/*
 path-exclude=/usr/share/man/*
 path-exclude=/usr/share/common-licenses/*
 path-exclude=/usr/share/info/*
