@@ -386,3 +386,5 @@ build-essential
 flex
 perl
 libelf-dev
+libfdt1
+libjemalloc2
