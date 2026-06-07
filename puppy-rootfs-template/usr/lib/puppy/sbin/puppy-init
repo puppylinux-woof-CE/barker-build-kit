@@ -103,16 +103,35 @@ set_blockdev_permissions(){
 	
 }
 
+setup_devshm(){
+
+	FREERAM=`free | grep -o 'Mem: .*' | tr -s ' ' | cut -f 4 -d ' '` #w481 110405
+	QTRFREERAM=`expr $FREERAM \/ 4`	
+
+	##v2.20 some apps need shm (shared memory) (ex: xfdiff)... 100319 do this always...
+	mkdir -p /dev/shm #120503 if kernel mounts a f.s. on /dev, removes my skeleton /dev
+	busybox mount -t tmpfs -o size=${QTRFREERAM}k shmfs /dev/shm
+	touch /dev/shm/puppy-shared.flg
+	
+}
 
 [ -f /etc/rc.d/PUPSTATE ] && . /etc/rc.d/PUPSTATE
 
 [ -f /etc/init-system.conf ] && . /etc/init-system.conf
 
-[ "$INITEXEC" == "" ] && INITEXEC='/bin/busybox init'
+if [ "$INITEXEC" == "" ]; then
+  [ $PUPMODE -ne 2 ] && INITEXEC='/run/initramfs/bin/busybox'
+fi
 
-[ "$PUPMODE" = "" ] && PUPMODE=2
+[ "$PUPMODE" == "" ] && PUPMODE=2
 
 mount_sysmain
+
+setup_devshm
+
+if [ "$(mount | grep " on / " | grep "type aufs")" != "" ]; then
+  mount -o remount,xino="/run/initramfs/aufs.xino" /
+fi
 
 clear > /dev/console
 
@@ -123,9 +142,34 @@ echo "" >/dev/console
 set_blockdev_permissions
 
 if [ $PUPMODE -ne 2 ]; then
+	
+	#not a full hd install.
+	
 	umount_sysmain
+	
 	echo -e "Starting the main system...\n" > /dev/console
-	exec ${INITEXEC} #not a full hd install.
+	
+	if [ -L $INITEXEC ]; then
+	  REALBIN=$(readlink $INITEXEC)
+	else
+	  REALBIN="$INITEXEC"
+	fi
+	
+	BNAME=$(basename $REALBIN)
+	
+	if [ "$BNAME" != "systemd" ]; then
+	    
+	    if [ "$BNAME" != "busybox" ]; then
+			cp -af $REALBIN /run/initramfs/$BNAME.bin
+			exec /run/initramfs/$BNAME.bin
+		else
+			exec /run/initramfs/bin/busybox init
+		fi
+	
+	else
+	   exec $INITEXEC	
+	fi
+	
 fi
 
 #==============================================================
