@@ -157,18 +157,26 @@ if [ $PUPMODE -ne 2 ]; then
 	
 	BNAME=$(basename $REALBIN)
 	
-	if [ "$BNAME" != "systemd" ]; then
-	    
-	    if [ "$BNAME" != "busybox" ]; then
-			cp -af $REALBIN /run/initramfs/$BNAME.bin
+	case $BNAME in
+		init|runit-init)
+		  
+		  STATIC_BIN="$(file "$REALBIN" | grep "LSB executable" | grep "static")"
+		  
+		  if [ "$STATIC_BIN" != "" ]; then
+		    cp -af $REALBIN /run/initramfs/$BNAME.bin
 			exec /run/initramfs/$BNAME.bin
-		else
-			exec /run/initramfs/bin/busybox init
-		fi
-	
-	else
-	   exec $INITEXEC	
-	fi
+		  else
+		    exec $INITEXEC
+		  fi
+		
+		;;
+		busybox)  
+		   exec /run/initramfs/bin/busybox init
+		;;
+		*)
+		   exec $INITEXEC
+		;;
+	esac
 	
 fi
 
