@@ -26,7 +26,7 @@ export PATH="/usr/lib/puppy/bin:/usr/lib/puppy/sbin:/usr/bin/overrides:/usr/sbin
 	  fi
 	fi
 	
-	LD_LIBRARY_PATH="/lib/overrides:${LD_LIBRARY_PATH}"
+	LD_LIBRARY_PATH="/usr/local/lib/overrides:${LD_LIBRARY_PATH}"
 	
 	export LD_LIBRARY_PATH
 
