@@ -22,7 +22,7 @@ if [ "$LD_LIBRARY_PATH" == "" ]; then
 	  fi
 	fi
 	
-	LD_LIBRARY_PATH="/usr/lib/overrides:${LD_LIBRARY_PATH}"
+	LD_LIBRARY_PATH="/usr/local/lib/overrides:${LD_LIBRARY_PATH}"
 	
 	export LD_LIBRARY_PATH
 
