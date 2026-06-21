@@ -6,13 +6,13 @@ export LANG=C
 
 export HOME="/root"
 
-export PATH="/usr/lib/puppy/bin:/usr/lib/puppy/sbin:/usr/bin/overrides:/usr/sbin/overrides:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin/32:/usr/sbin/32:/usr/games:/root/my-applications/bin"
+export PATH="/usr/lib/puppy/bin:/usr/lib/puppy/sbin:/usr/bin/overrides:/usr/sbin/overrides:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/bin/32:/usr/sbin/32:/usr/games:/root/my-applications/bin"
 
 #if [ "$LD_LIBRARY_PATH" == "" ]; then
 
-	LD_LIBRARY_PATH32="/lib32:/usr/lib32:/usr/local/lib32:/libx32:/usr/libx32:/usr/local/libx32:/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu:/lib:/usr/lib:/usr/local/lib:/root/my-applications/lib"
-	LD_LIBRARY_PATH64="/lib64:/usr/lib64:/usr/local/lib64:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/local/lib/x86_64-linux-gnu:/lib:/usr/lib:/usr/local/lib:/root/my-applications/lib"
-	LD_LIBRARY_PATH64_COMPAT="/lib32:/usr/lib32:/usr/local/lib32:/libx32:/usr/libx32:/usr/local/libx32:/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/usr/local/lib/i386-linux-gnu"
+	LD_LIBRARY_PATH32="/usr/local/lib32:/usr/lib32:/lib32:/usr/local/libx32:/usr/libx32:/libx32:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/lib/i386-linux-gnu:/usr/local/lib:/usr/lib:/lib:/root/my-applications/lib"
+	LD_LIBRARY_PATH64="/usr/local/lib64:/usr/lib64:/lib64:/usr/local/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/local/lib:/usr/lib:/lib:/root/my-applications/lib"
+	LD_LIBRARY_PATH64_COMPAT="/usr/local/lib32:/usr/lib32:/lib32:/usr/local/libx32:/usr/libx32:/libx32:/usr/local/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/lib/i386-linux-gnu"
 		
 	if [ -e /lib64/libc.so.6 ] || [ -e /lib/x86_64-linux-gnu/libc.so.6 ]; then #slackware64
 		LD_LIBRARY_PATH="${LD_LIBRARY_PATH64}:${LD_LIBRARY_PATH64_COMPAT}"
