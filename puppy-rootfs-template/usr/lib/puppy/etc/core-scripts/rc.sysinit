@@ -152,7 +152,7 @@ create_zram_swap() {
   
   RAM=`awk '/MemTotal/{print $2}' /proc/meminfo`
   
-  zRAMSIZE=$(expr 15 \* 100 / $RAM)
+  zRAMSIZE=$(expr $RAM \* 15 / 100)
   
   echo $zRAMSIZE > /sys/block/zram0/disksize || return 1
   mkswap /dev/zram0 || return 1
