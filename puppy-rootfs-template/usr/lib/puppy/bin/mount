@@ -38,6 +38,13 @@ if [ ! "$USER_ID" ] ; then
 	[ -f /tmp/services/user_info ] && . /tmp/services/user_info
 fi
 
+if [ ! "$USER_ID" ] ; then
+	USER_ID=$(id -u)
+	USER_GROUP_ID=$(id -g)
+fi
+
+
+
 if [ "$USER_ID" ] ; then
 	USER_OPTS="uid=${USER_ID},gid=${USER_GROUP_ID},"
 	USER_OPTS_2="-o uid=${USER_ID},gid=${USER_GROUP_ID}"
@@ -139,7 +146,7 @@ elif [ "$BTRFS_FLAG" = "yes" ];then
       
       CMDPRMS="`echo -n "$*" | tr '\t' ' ' | tr -s ' ' | tr ' ' '\n' | grep '^/' | tr '\n' ' '`"
       
-      OPT="-o noatime,space_cache=v2,autodefrag,commit=10"
+      OPT="-o noatime,lazytime,space_cache=v2,autodefrag,commit=10"
       
       ${MOUNT_EXEC} -t btrfs ${OPT} -n $CMDPRMS
       
@@ -157,7 +164,7 @@ elif [ "$EXT4_FLAG" = "yes" ];then
       
       CMDPRMS="`echo -n "$*" | tr '\t' ' ' | tr -s ' ' | tr ' ' '\n' | grep '^/' | tr '\n' ' '`"
       
-      OPT="-o noatime,commit=10,barrier=1,data=ordered,journal_checksum"
+      OPT="-o noatime,lazytime,commit=15,barrier=1,data=ordered,journal_checksum"
       
       ${MOUNT_EXEC} -t ext4 ${OPT} -n $CMDPRMS
       
@@ -179,19 +186,30 @@ elif [ "$NTFS_FLAG" = "yes" ];then
   case "$@" in
     *"-o "*) #don't override -o
     
-    if [ "$(grep -m1 "ntfs3" /proc/filesystems 2>/dev/null)" != "" ]; then
-      USE_NTFS3="y"
-    elif modprobe -q ntfs3 2>/dev/null; then
-      USE_NTFS3="y"
-    else
-      USE_NTFS3=""
-    fi  
-    
-     NTFS_3G="y" 
+	  if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+		USE_NEW_NTFS_DRV="y"
+	  else
+		
+		if [ "$(grep -m1 "ntfs3" /proc/filesystems 2>/dev/null)" != "" ]; then
+		  USE_NEW_NTFS_DRV="y"
+		elif modprobe -q ntfs3 2>/dev/null; then
+		  USE_NEW_NTFS_DRV="y"
+		else
+		  USE_NEW_NTFS_DRV=""
+		fi  
+		
+		NTFS_3G="y" 
+		 
+	  fi
       
-      if [ "$USE_NTFS3" != "" ]; then
+      if [ "$USE_NEW_NTFS_DRV" != "" ]; then
        
-       ${MOUNT_EXEC} "$(echo "${@}" | sed -e 's#\ ntfs\ #\ ntfs3\ #')"
+       if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+        ${MOUNT_EXEC} "${@}"
+       else
+		${MOUNT_EXEC} "$(echo "${@}" | sed -e 's#\ ntfs\ #\ ntfs3\ #')"
+       fi
+       
        RETVAL=$?
        
 	   if [ $RETVAL -eq 0 ]; then
@@ -214,7 +232,7 @@ elif [ "$NTFS_FLAG" = "yes" ];then
 	  
 	  fi	
       
-      if [ "$USE_NTFS3" == "" ]; then
+      if [ "$USE_NEW_NTFS_DRV" == "" ]; then
          [ ! -d /tmp/ntfs-errors ] && mkdir -p /tmp/ntfs-errors
 	  fi
 	  
@@ -232,34 +250,54 @@ elif [ "$NTFS_FLAG" = "yes" ];then
       CMDPRMS="`echo -n "$*" | tr '\t' ' ' | tr -s ' ' | tr ' ' '\n' | grep '^/' | tr '\n' ' '`"
       #kirk advised these options so Rox will not complain about file
       #permissions when copy a file to a ntfs partition...
-
-	  if [ "$(grep -m1 "ntfs3" /proc/filesystems 2>/dev/null)" != "" ]; then
-	   USE_NTFS3="y"
-	  elif modprobe -q ntfs3 2>/dev/null; then
-	   USE_NTFS3="y"
-	  else
-	   USE_NTFS3=""
-	  fi  
+	 
+	  if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+	 	  USE_NEW_NTFS_DRV="y"
+      else
+      
+		  if [ "$(grep -m1 "ntfs3" /proc/filesystems 2>/dev/null)" != "" ]; then
+		   USE_NEW_NTFS_DRV="y"
+		  elif modprobe -q ntfs3 2>/dev/null; then
+		   USE_NEW_NTFS_DRV="y"
+		  else
+		   USE_NEW_NTFS_DRV=""
+		  fi  
+		 
+		  NTFS_3G="y"       
+      
+      fi
+      
      
-      NTFS_3G="y" 
      	
-	  if [ "$USE_NTFS3" != "" ]; then
+	  if [ "$USE_NEW_NTFS_DRV" != "" ]; then
+	   
+	   if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+	     ACTIVE_NTFS_MOD="ntfs"
+	   else
+	     ACTIVE_NTFS_MOD="ntfs3"	   
+	   fi
 	  
-	   NTFS3_PARAM="${USER_OPTS},prealloc,noatime,iocharset=utf8"
-	  
-	   if [ $KMAJOR -ge 6 ] && [ $KMINOR -ge 2 ]; then
-         NTFS3_PARAM="${NTFS3_PARAM},nocase,windows_names"	   
+	   NTFS_PARAM="${USER_OPTS}noatime,iocharset=utf8"
+	   
+	   if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+         NTFS_PARAM="${NTFS_PARAM},nocase,windows_names"	   
+       elif [ $KMAJOR -ge 6 ] && [ $KMINOR -ge 2 ]; then
+         NTFS_PARAM="${NTFS_PARAM},prealloc,nocase,windows_names"
+       else
+         NTFS_PARAM="${NTFS_PARAM},prealloc"	   
        fi
        
-       busybox mount -t ntfs3 -o ${NTFS3_PARAM} $CMDPRMS
+       echo "busybox mount -t $ACTIVE_NTFS_MOD -o ${NTFS_PARAM} $CMDPRMS"
+       
+       busybox mount -t $ACTIVE_NTFS_MOD -o ${NTFS_PARAM} $CMDPRMS
        
        RETVAL=$?
        
        if [ $RETVAL -ne 0 ]; then
-        busybox mount -t ntfs3 -o ${NTFS3_PARAM},force $CMDPRMS 
+        busybox mount -t $ACTIVE_NTFS_MOD -o ${NTFS_PARAM},force $CMDPRMS 
         RETVAL=$?
        fi
-       
+              
        if [ $RETVAL -eq 0 ]; then
         NTFS_3G=""  
        else
@@ -327,8 +365,12 @@ boot Windows and fix the filesystem first!!!" &
 	
 	
 	  fi	
-		
-		
+	  
+	  
+	  if [ $KMAJOR -ge 7 ] && [ $KMINOR -ge 1 ]; then
+		exit $RETVAL
+	  fi
+	  	
       #ntfs-3g plays very safe and will not mount if thinks anything
       #wrong with ntfs f.s. But, we may want to recover files from a
       #damaged windows. So, fall back to the kernel ntfs driver...
@@ -345,7 +387,7 @@ boot Windows and fix the filesystem first!!!" &
         
         NTFS_DRV="ntfs3"
         
-        [ "$USE_NTFS3" == "" ] && NTFS_DRV="ntfs-3g"
+        [ "$USE_NEW_NTFS_DRV" == "" ] && NTFS_DRV="ntfs-3g"
         
         [ ! "`pidof X`" = "" ] && nohup gxmessage -bg red -center -title "NTFS WARNING" "The $NTFS_DRV driver was unable to mount the NTFS
 partition and returned this error message:
