@@ -529,6 +529,13 @@ sed -i -e 's/^PRETTY_NAME=.*/PRETTY_NAME="'"${OS_RELEASE_PRETTY_NAME}"'"/g' ${WK
 sed -i -e 's/^NAME=.*/NAME="'"${OS_RELEASE_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
 sed -i -e 's/^VERSION_CODENAME=.*/VERSION_CODENAME="'"${DEBIAN_VERSION_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
 
+. ${WKGBASE}/DISTRO_SPECS
+
+sed -i -e 's/^Name=.*/Name=Puppy Linux/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+sed -i -e 's/^LogoPath=.*/LogoPath=puppy/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+sed -i -e 's/^Variant=.*/Variant=Debian '"${DEBIAN_VERSION_NAME}"'/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+sed -i -e 's/^Version=.*/Version=('"${DISTRO_NAME} ${DISTRO_VERSION}"')/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+
 for issuef in issue issue.net
 do
  echo "${OS_RELEASE_PRETTY_NAME}" > ${WKGBASE}/${ROOTFS}/etc/${issuef}
