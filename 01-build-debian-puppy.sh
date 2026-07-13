@@ -135,6 +135,14 @@ echo "===> Cleaning old rootfs if present..."
 
 [ -d ${WKGBASE}/${ROOTFS} ] && rm -rf ${WKGBASE}/${ROOTFS} && sync
 
+mkdir -p ${WKGBASE}/${ROOTFS}/usr/sbin
+
+# Write the policy bypass script
+echo "#!/bin/sh
+exit 101" > "${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d"
+
+chmod +x "${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d"
+
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d
 
