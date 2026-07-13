@@ -145,6 +145,8 @@ chmod +x "${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d"
 
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d
+
+touch ${WKGBASE}/${ROOTFS}/etc/machine-id
 head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n' > ${WKGBASE}/${ROOTFS}/etc/machine-id
 
 # dpkg excludes to keep it minimal
