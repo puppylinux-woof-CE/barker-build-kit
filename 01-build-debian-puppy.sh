@@ -185,7 +185,7 @@ fi
 
 echo
 echo "===> Bootstrapping Debian ${DEBIAN_VERSION_NAME} base system..."
-$DEBOOTSTRAP_CMD --arch=${DEBIAN_ARCH} --variant=minbase --include=locales,dialog,busybox-static,sudo,wget,lsof,curl,ca-certificates ${DEBIAN_VERSION_NAME} ${WKGBASE}/${ROOTFS} ${DEBIAN_SITE}
+$DEBOOTSTRAP_CMD --arch=${DEBIAN_ARCH} --variant=minbase --include=locales,dialog,busybox-static,sudo,wget,lsof,curl,ca-certificates --exclude=systemd ${DEBIAN_VERSION_NAME} ${WKGBASE}/${ROOTFS} ${DEBIAN_SITE}
 sync
 
 echo
