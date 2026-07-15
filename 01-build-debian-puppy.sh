@@ -146,9 +146,6 @@ chmod +x "${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d"
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d
 mkdir -p ${WKGBASE}/${ROOTFS}/etc/apt/apt.conf.d
 
-touch ${WKGBASE}/${ROOTFS}/etc/machine-id
-head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n' > ${WKGBASE}/${ROOTFS}/etc/machine-id
-
 # dpkg excludes to keep it minimal
 cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/50excldoc <<EOF
 path-exclude=/usr/share/doc/*
@@ -265,6 +262,8 @@ EOF
 
 chmod +x ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
 
+mkdir -p ${WKGBASE}/${ROOTFS}/etc
+openssl rand -hex 16 > ${WKGBASE}/${ROOTFS}/etc/machine-id
 
 echo
 echo "Basic Debian ${DEBIAN_VERSION_NAME} rootfs created!"
