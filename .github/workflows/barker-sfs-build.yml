@@ -11,7 +11,7 @@ jobs:
 
     container:
       image: debian:sid
-
+      options: --privileged
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
