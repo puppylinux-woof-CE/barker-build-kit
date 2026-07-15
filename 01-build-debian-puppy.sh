@@ -262,7 +262,8 @@ EOF
 
 chmod +x ${WKGBASE}/${ROOTFS}/usr/sbin/policy-rc.d
 
-mkdir -p ${WKGBASE}/${ROOTFS}/etc
+mkdir -p ${WKGBASE}/${ROOTFS}/etc 2>/dev/null
+[ -e ${WKGBASE}/${ROOTFS}/etc/machine-id ] && rm -f ${WKGBASE}/${ROOTFS}/etc/machine-id
 openssl rand -hex 16 > ${WKGBASE}/${ROOTFS}/etc/machine-id
 
 echo
@@ -531,6 +532,7 @@ cp -f ${WKGBASE}/external-tools/update-system-packages ${WKGBASE}/${ROOTFS}/usr/
 chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/dpkg-split-status-file
 
 echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
+echo "" > ${WKGBASE}/${ROOTFS}/etc/machine-id
 
 rm -f ${WKGBASE}/${ROOTFS}/etc/os-release
 cp -f ${WKGBASE}/${ROOTFS}/usr/lib/os-release ${WKGBASE}/${ROOTFS}/etc/os-release
