@@ -481,7 +481,6 @@ EOF
 cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/00-keep-puppy-branding <<EOF
 path-exclude=/etc/skel/.face
 path-exclude=/etc/os-release
-path-exclude=/etc/xdg/kcm-about-distrorc
 EOF
 
 chroot ${WKGBASE}/${ROOTFS} systemctl disable openvpn smartmontools ldconfig strongswan-starter nvmefc-boot-connections.service nvmf-autoconnect.service smbd nmbd NetworkManager-wait-online
@@ -544,23 +543,26 @@ chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/dpkg-split-status-file
 echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
 echo "" > ${WKGBASE}/${ROOTFS}/etc/machine-id
 
-rm -f ${WKGBASE}/${ROOTFS}/etc/os-release
-cp -f ${WKGBASE}/${ROOTFS}/usr/lib/os-release ${WKGBASE}/${ROOTFS}/etc/os-release
-
-sed -i -e 's/^PRETTY_NAME=.*/PRETTY_NAME="'"${OS_RELEASE_PRETTY_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
-sed -i -e 's/^NAME=.*/NAME="'"${OS_RELEASE_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
-sed -i -e 's/^VERSION_CODENAME=.*/VERSION_CODENAME="'"${DEBIAN_VERSION_NAME}"'"/g' ${WKGBASE}/${ROOTFS}/etc/os-release
+[ -e ${WKGBASE}/${ROOTFS}/etc/os-release ] && rm -f ${WKGBASE}/${ROOTFS}/etc/os-release
 
 . ${WKGBASE}/DISTRO_SPECS
 
-sed -i -e 's/^Name=.*/Name=Puppy Linux/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-sed -i -e 's/^LogoPath=.*/LogoPath=puppy/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-
-if [ "$(grep -m 1  "^Variant=" ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc)" != "" ]; then
-	sed -i -e 's/^Variant=.*/Variant='"${DISTRO_NAME} ${DISTRO_VERSION}"'/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-else
-	echo "Variant=${DISTRO_NAME} ${DISTRO_VERSION}" >> ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-fi
+cat > ${WKGBASE}/${ROOTFS}/etc/os-release <<EOF
+NAME="${OS_RELEASE_NAME}"
+ID=debian
+PRETTY_NAME="${OS_RELEASE_PRETTY_NAME}"
+VERSION=${DISTRO_VERSION}
+VERSION_ID=${DISTRO_VERSION}
+VERSION_CODENAME=${DEBIAN_VERSION_NAME}
+ID_LIKE=debian
+HOME_URL="https://puppylinux.com/"
+SUPPORT_URL="https://forum.puppylinux.com"
+BUG_REPORT_URL="https://forum.puppylinux.com"
+CPE_NAME="cpe:/o:puppy:puppy:${DISTRO_VERSION}"
+LOGO=puppy
+VARIANT=${DISTRO_NAME}
+RELEASE_TYPE="rolling"
+EOF
 
 [ -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ] && cp -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ${WKGBASE}/${ROOTFS}/root/.face
 
