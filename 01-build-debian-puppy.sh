@@ -462,7 +462,7 @@ if [ -f ${WKGBASE}/${ROOTFS}/etc/lightdm/lightdm.conf ]; then
 fi
 
 # revise dpkg excludes to keep it minimal
-cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/50excldoc <<EOF
+cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/50-exclude-doc <<EOF
 path-exclude=/usr/share/doc/*
 path-exclude=/usr/doc/*
 path-exclude=/usr/src/*
@@ -472,6 +472,13 @@ path-exclude=/usr/share/info/*
 path-exclude=/usr/share/locale/*
 path-exclude=/usr/share/help/*
 path-exclude=/usr/share/gtk-doc/*
+EOF
+
+#keep puppy branding
+cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/00-keep-puppy-branding <<EOF
+path-exclude=/etc/skel/.face
+path-exclude=/etc/os-release
+path-exclude=/etc/xdg/kcm-about-distrorc
 EOF
 
 chroot ${WKGBASE}/${ROOTFS} systemctl disable openvpn smartmontools ldconfig strongswan-starter nvmefc-boot-connections.service nvmf-autoconnect.service smbd nmbd NetworkManager-wait-online
