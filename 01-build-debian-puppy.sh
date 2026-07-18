@@ -545,8 +545,12 @@ sed -i -e 's/^VERSION_CODENAME=.*/VERSION_CODENAME="'"${DEBIAN_VERSION_NAME}"'"/
 
 sed -i -e 's/^Name=.*/Name=Puppy Linux/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
 sed -i -e 's/^LogoPath=.*/LogoPath=puppy/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-sed -i -e 's/^Variant=.*/Variant=Debian '"${DEBIAN_VERSION_NAME}"'/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
-sed -i -e 's/^Version=.*/Version=('"${DISTRO_NAME} ${DISTRO_VERSION}"')/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+
+if [ "$(grep -m 1  "^Variant=" ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc)" != "" ]; then
+	sed -i -e 's/^Variant=.*/Variant='"${DISTRO_NAME} ${DISTRO_VERSION}"'/g' ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+else
+	echo "Variant=${DISTRO_NAME} ${DISTRO_VERSION}" >> ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
+fi
 
 for issuef in issue issue.net
 do
