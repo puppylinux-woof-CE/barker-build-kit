@@ -314,6 +314,9 @@ cp -arf ${WKGBASE}/puppy-rootfs-template/* ${WKGBASE}/${ROOTFS}/
 cp -arf ${WKGBASE}/puppy-rootfs-template/usr/lib/puppy/etc/config-template/* ${WKGBASE}/${ROOTFS}/etc/
 cp -arf ${WKGBASE}/DISTRO_SPECS ${WKGBASE}/${ROOTFS}/etc/DISTRO_SPECS
 
+[ -d ${WKGBASE}/chroot-includes ] && cp -arf ${WKGBASE}/chroot-includes/* ${WKGBASE}/${ROOTFS}/
+[ -d ${WKGBASE}/includes.chroot ] && cp -arf ${WKGBASE}/includes.chroot/* ${WKGBASE}/${ROOTFS}/
+
 chroot ${WKGBASE}/${ROOTFS} systemctl enable puppy-rc-sysinit puppy-rc-shutdown zramswap dkms-check
 chroot ${WKGBASE}/${ROOTFS} ln -sr /usr/bin/busybox /usr/bin/ash
 
@@ -558,6 +561,8 @@ if [ "$(grep -m 1  "^Variant=" ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc)"
 else
 	echo "Variant=${DISTRO_NAME} ${DISTRO_VERSION}" >> ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
 fi
+
+[ -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ] && cp -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ${WKGBASE}/${ROOTFS}/root/.face
 
 for issuef in issue issue.net
 do
