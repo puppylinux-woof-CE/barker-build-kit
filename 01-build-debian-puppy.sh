@@ -565,11 +565,7 @@ VARIANT=${DISTRO_NAME}
 RELEASE_TYPE="rolling"
 EOF
 
-cat > ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc <<EOF
-[General]
-LogoPath=puppy
-Variant=${DISTRO_NAME}
-EOF
+echo "" > ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc
 
 [ -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ] && cp -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ${WKGBASE}/${ROOTFS}/root/.face
 
