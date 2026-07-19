@@ -479,8 +479,9 @@ EOF
 
 #keep puppy branding
 cat >  ${WKGBASE}/${ROOTFS}/etc/dpkg/dpkg.cfg.d/00-keep-puppy-branding <<EOF
-path-exclude=/etc/skel/.face
+path-exclude=/etc/skel/*
 path-exclude=/etc/os-release
+path-exclude=/etc/xdg/kcm-about-distrorc
 EOF
 
 chroot ${WKGBASE}/${ROOTFS} systemctl disable openvpn smartmontools ldconfig strongswan-starter nvmefc-boot-connections.service nvmf-autoconnect.service smbd nmbd NetworkManager-wait-online
@@ -562,6 +563,12 @@ CPE_NAME="cpe:/o:puppy:puppy:${DISTRO_VERSION}"
 LOGO=puppy
 VARIANT=${DISTRO_NAME}
 RELEASE_TYPE="rolling"
+EOF
+
+cat > ${WKGBASE}/${ROOTFS}/etc/xdg/kcm-about-distrorc <<EOF
+[General]
+LogoPath=puppy
+Variant=${DISTRO_NAME}
 EOF
 
 [ -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ] && cp -f ${WKGBASE}/${ROOTFS}/etc/skel/.face ${WKGBASE}/${ROOTFS}/root/.face
