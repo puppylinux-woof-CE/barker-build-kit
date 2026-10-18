@@ -15,7 +15,7 @@ wget -O rox2.zip \
 echo "Extracting..."
 unzip rox2.zip
 
-echo "Building gtkdialog..."
+echo "Building rox-filer2..."
 cd "ROX-Filer2-main"
 #meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
 
