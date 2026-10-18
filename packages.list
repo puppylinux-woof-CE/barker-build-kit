@@ -393,3 +393,5 @@ oxygen-icon-theme
 shim-signed
 grub-efi-amd64-bin
 grub-common
+libimobiledevice-utils
+ifuse
