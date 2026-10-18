@@ -37,7 +37,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git rm puppy-rootfs-template/usr/lib/puppy/*
+          git rm -r puppy-rootfs-template/usr/lib/puppy/*
           git add puppy-rootfs-template/usr/local/puppy/*
           git add puppy-rootfs-template/usr/local/puppy/bin/*
           git add puppy-rootfs-template/usr/local/puppy/sbin/*
