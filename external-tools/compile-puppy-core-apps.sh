@@ -59,6 +59,9 @@ libgtk2.0-dev
 libvte-dev
 libcrypt-dev
 intltool
+libsmbclient-dev
+libmtp-dev
+libgphoto2-dev
 '
 
 for ldir in bin lib share/applications share/dbus-1 share/fonts share/icons share/pixmaps sbin
