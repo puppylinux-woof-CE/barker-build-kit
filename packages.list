@@ -20,9 +20,8 @@ libpam-runtime
 polkitd
 polkit-kde-agent-1
 pkexec
-dbus
+dbus-broker
 dbus-user-session
-dbus-x11
 pipewire
 pipewire-alsa
 pipewire-audio
