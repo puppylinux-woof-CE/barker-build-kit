@@ -314,6 +314,10 @@ cp -arf ${WKGBASE}/puppy-rootfs-template/* ${WKGBASE}/${ROOTFS}/
 cp -arf ${WKGBASE}/puppy-rootfs-template/usr/local/puppy/etc/config-template/* ${WKGBASE}/${ROOTFS}/etc/
 cp -arf ${WKGBASE}/DISTRO_SPECS ${WKGBASE}/${ROOTFS}/etc/DISTRO_SPECS
 
+chroot ${WKGBASE}/${ROOTFS} ln -s /usr/local/puppy/lib/gtkdialog /usr/lib/gtkdialog
+chroot ${WKGBASE}/${ROOTFS} cp -asn /usr/local/puppy/bin/* /usr/local/bin/
+chroot ${WKGBASE}/${ROOTFS} cp -asn /usr/local/puppy/sbin/* /usr/local/sbin/
+
 [ -d ${WKGBASE}/chroot-includes ] && cp -arf ${WKGBASE}/chroot-includes/* ${WKGBASE}/${ROOTFS}/
 [ -d ${WKGBASE}/includes.chroot ] && cp -arf ${WKGBASE}/includes.chroot/* ${WKGBASE}/${ROOTFS}/
 
