@@ -66,6 +66,8 @@ libxml2-dev
 libsm-dev
 libice-dev
 libimobiledevice-dev
+libimobiledevice-utils
+ifuse
 '
 
 for ldir in bin lib share/applications share/dbus-1 share/fonts share/icons share/pixmaps sbin
