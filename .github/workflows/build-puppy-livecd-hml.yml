@@ -180,7 +180,7 @@ jobs:
                 cp -arf ./hannah-montana-linux/config/includes.chroot/usr/share/$fld $ROOTFS/usr/share/
               done
               
-              chroot $ROOTFS /usr/lib/puppy/sbin/update-cache.sh y
+              chroot $ROOTFS /usr/local/puppy/sbin/update-cache.sh y
 
       - name: Prepare Live CD
         shell: bash
