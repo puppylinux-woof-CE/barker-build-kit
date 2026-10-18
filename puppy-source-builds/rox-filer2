@@ -17,8 +17,10 @@ unzip rox2.zip
 
 echo "Building gtkdialog..."
 cd "ROX-Filer2-main"
-meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
-ninja -C build install
+#meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
+./build-package.sh
+OUTDIR="$(find ./ -type d -name "*-portable-*" | head -n 1)"
+cp -rf $OUTDIR/usr/* /usr/local/
 
 cd /tmp
 
