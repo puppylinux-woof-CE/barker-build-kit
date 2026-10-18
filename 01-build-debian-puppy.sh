@@ -311,7 +311,7 @@ echo
 echo "===> Installing Puppy Components!"
 
 cp -arf ${WKGBASE}/puppy-rootfs-template/* ${WKGBASE}/${ROOTFS}/
-cp -arf ${WKGBASE}/puppy-rootfs-template/usr/lib/puppy/etc/config-template/* ${WKGBASE}/${ROOTFS}/etc/
+cp -arf ${WKGBASE}/puppy-rootfs-template/usr/local/puppy/etc/config-template/* ${WKGBASE}/${ROOTFS}/etc/
 cp -arf ${WKGBASE}/DISTRO_SPECS ${WKGBASE}/${ROOTFS}/etc/DISTRO_SPECS
 
 [ -d ${WKGBASE}/chroot-includes ] && cp -arf ${WKGBASE}/chroot-includes/* ${WKGBASE}/${ROOTFS}/
@@ -512,13 +512,13 @@ do
 done
 
 #redirect jack apps to pipewire
-if [ -f ${WKGBASE}/${ROOTFS}/usr/lib/puppy/sbin/pipewire-jack-helper.sh ]; then
-	chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/sbin/pipewire-jack-helper.sh
+if [ -f ${WKGBASE}/${ROOTFS}/usr/local/puppy/sbin/pipewire-jack-helper.sh ]; then
+	chroot ${WKGBASE}/${ROOTFS} /usr/local/puppy/sbin/pipewire-jack-helper.sh
 fi
 
 #fix root account access
-if [ -f ${WKGBASE}/${ROOTFS}/usr/lib/puppy/bin/fix-root-access ]; then
-	chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/fix-root-access
+if [ -f ${WKGBASE}/${ROOTFS}/usr/local/puppy/bin/fix-root-access ]; then
+	chroot ${WKGBASE}/${ROOTFS} /usr/local/puppy/bin/fix-root-access
 fi
 
 if [ "$SUDO_GUI" != "" ]; then
@@ -539,7 +539,7 @@ fi
 
 cp -f ${WKGBASE}/external-tools/update-system-packages ${WKGBASE}/${ROOTFS}/usr/local/bin/update-system-packages
 
-chroot ${WKGBASE}/${ROOTFS} /usr/lib/puppy/bin/dpkg-split-status-file
+chroot ${WKGBASE}/${ROOTFS} /usr/local/puppy/bin/dpkg-split-status-file
 
 echo "" > ${WKGBASE}/${ROOTFS}/etc/resolv.conf
 echo "" > ${WKGBASE}/${ROOTFS}/etc/machine-id
