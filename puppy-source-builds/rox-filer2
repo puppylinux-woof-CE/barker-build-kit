@@ -17,7 +17,6 @@ unzip rox2.zip
 
 echo "Building rox-filer2..."
 cd "ROX-Filer2-main"
-#meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
 
 ./build-package.sh
 
@@ -25,7 +24,8 @@ OUTDIR="$(find ./ -type d -name "*-portable-*" 2>/dev/null | head -n 1 2>/dev/nu
 
 if [ "$OUTDIR" != "" ]; then
   echo "Copying  $OUTDIR/usr to /usr/local ..."
-  cp -rf $OUTDIR/usr/* /usr/local/
+  cp -arf $OUTDIR/usr/* /usr/local/
+  sed -i -e 's#\/usr\/lib\/rox-filer2\/#\/usr\/local\/lib\/rox-filer2\/#g' /usr/local/bin/roxfiler
 fi
 
 cd /tmp
