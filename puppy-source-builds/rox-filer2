@@ -1,0 +1,25 @@
+#!/bin/bash
+
+cd /tmp
+
+WORKDIR=$(mktemp -d)
+
+cd "$WORKDIR"
+
+echo "Downloading sources..."
+
+# rox-filer2 (main branch)
+wget -O rox2.zip \
+  https://github.com/josejp2424/ROX-Filer2/archive/refs/heads/main.zip
+
+echo "Extracting..."
+unzip rox2.zip
+
+echo "Building gtkdialog..."
+cd "ROX-Filer2-main"
+meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
+ninja -C build install
+
+cd /tmp
+
+rm -rf ${WORKDIR}
