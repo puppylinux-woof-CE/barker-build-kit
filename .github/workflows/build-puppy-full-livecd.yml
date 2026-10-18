@@ -170,7 +170,7 @@ jobs:
               . ./build-settings.cfg
               cp -rf ./puppy-core-apps-build/* $ROOTFS/usr/local/
               
-              chroot $ROOTFS /usr/lib/puppy/sbin/update-cache.sh y
+              chroot $ROOTFS /usr/local/puppy/sbin/update-cache.sh y
 
       - name: Prepare Live CD
         shell: bash
