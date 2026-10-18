@@ -18,9 +18,15 @@ unzip rox2.zip
 echo "Building gtkdialog..."
 cd "ROX-Filer2-main"
 #meson --buildtype=release --prefix=/usr/local --bindir=/usr/local/bin build
+
 ./build-package.sh
-OUTDIR="$(find ./ -type d -name "*-portable-*" | head -n 1)"
-cp -rf $OUTDIR/usr/* /usr/local/
+
+OUTDIR="$(find ./ -type d -name "*-portable-*" 2>/dev/null | head -n 1 2>/dev/null)"
+
+if [ "$OUTDIR" != "" ]; then
+  echo "Copying  $OUTDIR/usr to /usr/local ..."
+  cp -rf $OUTDIR/usr/* /usr/local/
+fi
 
 cd /tmp
 
