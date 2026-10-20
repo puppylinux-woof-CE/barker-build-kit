@@ -1,0 +1,135 @@
+#!/bin/bash
+#auto-detect and configure nvidia gpu
+
+CONFIG_DIR="/etc/modprobe.d"
+CONFIG_FILE="$CONFIG_DIR/zz-nvidia-driver-selection.conf"
+
+# Require root.
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Run as root."
+    exit
+fi
+
+# Detect actual NVIDIA PCI display controllers.
+# Includes VGA, 3D, and other display-class devices.
+nvidia_found=0
+old_gpu_found=0
+
+for device in /sys/bus/pci/devices/*
+do
+
+    [ ! -f "$device/class" ] && continue
+    [ ! -f "$device/vendor" ] && continue
+    [ ! -f "$device/device" ] && continue
+    
+    class=$(cat "$device/class")
+
+    case "$class" in
+        0x03*)
+        
+            vendor=$(cat "$device/vendor")
+			
+			[ "$vendor" != "0x10de" ] && continue
+			
+			devid=$(cat "$device/device") 		
+            devid=$(printf '%s' "$devid" | tr 'abcdef' 'ABCDEF')
+			devid=${devid#0x}
+			
+			# Legacy/pre-Turing candidate range: 0000-1DFF.
+			# Compare hexadecimal IDs using shell arithmetic.
+			[ "$((0x$devid))" -lt "$((0x1E00))" ] && old_gpu_found=1
+		    
+            nvidia_found=1
+            
+            break
+            
+        ;;
+    esac
+    
+done
+
+if [ "$nvidia_found" -eq 0 ]; then
+    echo "No NVIDIA GPU detected."
+    exit 0
+fi
+
+# Determine installed driver availability.
+# Priority: proprietary NVIDIA > NVIDIA open > Nouveau.
+DRIVER=""
+
+[ $old_gpu_found -eq 1 ] && DRIVER="nouveau"
+
+if [ "$DRIVER" == "" ]; then 
+
+	if command -v modinfo >/dev/null 2>&1; then
+
+		# Both NVIDIA kernel module variants normally use the name "nvidia".
+		iMOD=$(modinfo -n nvidia 2>/dev/null)
+		
+		[ "$iMOD" != "" ] &&  DRIVER="nvidia"
+		
+		# Check a separately named open module if no nvidia module was found.
+		if [ "$DRIVER" == "" ]; then
+		
+			iMOD=$(modinfo -n nvidia-open 2>/dev/null)
+		
+			[ "$iMOD" != "" ] &&  DRIVER="nvidia-open"        
+		
+		fi
+		
+		# Nouveau is the final fallback.
+		if [ "$DRIVER" == "" ]; then
+		
+			iMOD=$(modinfo -n nouveau 2>/dev/null)
+		
+			[ "$iMOD" != "" ] &&  DRIVER="nouveau"        
+		
+		fi
+		
+	fi
+
+fi
+
+if [ "$DRIVER" == "" ]; then 
+  echo "No usable NVIDIA or Nouveau kernel module found."
+  exit 0
+fi
+
+echo "Selected nvidia driver: $DRIVER"
+
+case "$DRIVER" in
+    nvidia)
+        cat > "$CONFIG_FILE" <<'EOF'
+# Managed by nvidia-driver-select.sh
+blacklist nouveau
+blacklist nvidia-open
+alias nouveau off
+alias nvidia-open off
+options nouveau modeset=0
+options nvidia-open modeset=0
+EOF
+        ;;
+    nvidia-open)
+        cat > "$CONFIG_FILE" <<'EOF'
+# Managed by nvidia-driver-select.sh
+blacklist nouveau
+blacklist nvidia
+alias nouveau off
+alias nvidia off
+options nouveau modeset=0
+options nvidia modeset=0
+EOF
+        ;;
+    nouveau)
+        cat > "$CONFIG_FILE" <<'EOF'
+# Managed by nvidia-driver-select.sh
+blacklist nvidia
+blacklist nvidia-open
+alias nvidia off
+alias nvidia-open off
+options nvidia modeset=0
+options nvidia-open modeset=0
+
+EOF
+        ;;
+esac
