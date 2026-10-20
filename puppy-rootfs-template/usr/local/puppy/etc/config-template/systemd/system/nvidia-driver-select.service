@@ -1,0 +1,18 @@
+[Unit]
+Description=Select NVIDIA GPU kernel driver
+DefaultDependencies=no
+After=local-fs.target
+Before=sysinit.target
+Before=systemd-modules-load.service
+Before=systemd-udevd.service
+Before=systemd-udevd-control.socket
+Before=systemd-udevd-kernel.socket
+ConditionPathExists=/usr/local/puppy/bin/nvidia-driver-select
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/puppy/bin/nvidia-driver-select
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
