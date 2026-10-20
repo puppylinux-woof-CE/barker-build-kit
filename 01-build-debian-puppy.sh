@@ -324,7 +324,7 @@ chroot ${WKGBASE}/${ROOTFS} cp -asn /usr/local/puppy/sbin/* /usr/local/sbin/
 [ -d ${WKGBASE}/chroot-includes ] && cp -arf ${WKGBASE}/chroot-includes/* ${WKGBASE}/${ROOTFS}/
 [ -d ${WKGBASE}/includes.chroot ] && cp -arf ${WKGBASE}/includes.chroot/* ${WKGBASE}/${ROOTFS}/
 
-chroot ${WKGBASE}/${ROOTFS} systemctl enable puppy-rc-sysinit puppy-rc-shutdown zramswap dkms-check
+chroot ${WKGBASE}/${ROOTFS} systemctl enable puppy-rc-sysinit puppy-rc-shutdown zramswap dkms-check nvidia-driver-select
 chroot ${WKGBASE}/${ROOTFS} ln -sr /usr/bin/busybox /usr/bin/ash
 
 if [ "$FILEMNT_DEFAULT_FILEMANAGER" != "" ]; then
